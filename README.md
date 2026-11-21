@@ -47,7 +47,8 @@ compris). Deux minutes plus tard, le site répond sur `https://pwwe972.github.io
 Variante avec un compte existant : dépôt `pwwe`, puis **Settings > Pages > Deploy from a branch >
 main / (root)**. L'adresse devient `https://VOTRE-COMPTE.github.io/pwwe/`.
 
-Le QR code de l'écran et de l'affiche se calcule tout seul à partir de l'adresse d'hébergement.
+Le QR code de l'affiche se calcule tout seul à partir de l'adresse d'hébergement (ou de `ADRESSE` dans `config.js`).
+L'écran du stand n'affiche volontairement ni QR code ni adresse : les visiteurs passent par le stand.
 
 ## 4. Le jour J
 

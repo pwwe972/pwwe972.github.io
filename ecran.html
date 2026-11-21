@@ -9,16 +9,23 @@
 <link rel="stylesheet" href="assets/style.css">
 <style>
   html, body { height: 100%; overflow: hidden; }
-  body { display: grid; grid-template-columns: minmax(0, 1fr) 22vw; cursor: default; }
+  body { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; cursor: default; }
 
-  /* Colonne principale : question, nuage, dernier mot */
-  .scene { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 2.6vh 2.4vw 2.2vh; min-width: 0; }
+  /* Bandeau : logo, question centrée, compteur */
+  .entete {
+    display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr); align-items: center; gap: 2vw;
+    padding: 1.8vh 2.4vw; background: var(--brume);
+  }
+  .entete img.logo { justify-self: start; height: clamp(3.5rem, 13vh, 11rem); width: auto; }
   .question {
-    margin: 0; max-width: 34em;
-    font-family: var(--titre); font-weight: 900; color: var(--canne);
+    margin: 0; max-width: 30em; text-align: center;
+    font-family: var(--titre); font-weight: 900; color: #0b5c8c;
     font-size: clamp(1.4rem, 3.3vw, 5rem); line-height: 1.04; text-wrap: balance;
   }
-  .nuage { position: relative; margin: 1.5vh 0; min-height: 0; }
+  .compteur { justify-self: end; margin: 0; text-align: center; font-size: clamp(.8rem, 1.15vw, 1.8rem); line-height: 1.1; }
+  .compteur b { display: block; font-family: var(--titre); font-weight: 900; color: var(--canne); font-size: 3.6em; line-height: .95; }
+
+  .nuage { position: relative; margin: 2vh 2.4vw 1vh; min-height: 0; }
   .mot {
     position: absolute; left: 0; top: 0; white-space: nowrap;
     font-family: var(--titre); font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: .01em;
@@ -37,27 +44,15 @@
     position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
     font-family: var(--titre); font-weight: 400; color: var(--bois); font-size: clamp(1.4rem, 3vw, 4.4rem); line-height: 1.1;
   }
-  .pied { display: flex; align-items: baseline; justify-content: space-between; gap: 2vw; font-size: clamp(.9rem, 1.45vw, 2.2rem); min-height: 1.5em; }
+  .pied { margin: 0; padding: 0 2.4vw 2.2vh; display: flex; align-items: baseline; justify-content: space-between; gap: 2vw; font-size: clamp(.9rem, 1.45vw, 2.2rem); min-height: 1.5em; }
   .pied strong { font-family: var(--titre); font-weight: 900; text-transform: uppercase; color: var(--ciel-profond); font-size: 1.25em; letter-spacing: .01em; }
+  .pied .fois { margin-left: .7em; padding: .12em .6em; border-radius: 1em; background: var(--brume); color: var(--canne); font-weight: 600; white-space: nowrap; }
   .etat { color: var(--alerte); font-weight: 600; }
 
-  /* Colonne de droite : comment participer */
-  .rejoindre {
-    background: var(--brume); border-left: 3px solid var(--canne);
-    padding: 2.6vh 1.6vw 2.2vh; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0;
+  .bulle {
+    position: fixed; left: 0; top: 0; z-index: 5; margin: 0; padding: .35em .8em; border-radius: 6px; pointer-events: none; white-space: nowrap;
+    background: var(--melasse); color: #fff; font-weight: 600; font-size: clamp(1rem, 1.5vw, 2rem);
   }
-  .rejoindre img.logo { width: 62%; height: auto; }
-  .rejoindre h2 {
-    margin: 2.2vh 0 0; font-family: var(--titre); font-weight: 900; color: var(--canne);
-    font-size: clamp(1.1rem, 2.5vw, 3.8rem); line-height: 1.02;
-  }
-  .qr { width: 100%; margin: 2vh 0 0; padding: 5%; background: #fff; border: 3px solid var(--canne); border-radius: 6px; }
-  .qr svg { display: block; width: 100%; height: auto; }
-  .adresse { margin: 1.6vh 0 0; font-size: clamp(.8rem, 1.15vw, 1.8rem); line-height: 1.25; overflow-wrap: anywhere; }
-  .adresse b { display: block; font-weight: 600; color: var(--canne); font-size: 1.15em; }
-  .compteur { margin: auto 0 0; padding-top: 2vh; font-size: clamp(.8rem, 1.15vw, 1.8rem); }
-  .compteur b { display: block; font-family: var(--titre); font-weight: 900; color: var(--ciel-profond); font-size: 4.2em; line-height: .95; }
-
   .astuce {
     position: fixed; left: 50%; bottom: 3vh; transform: translateX(-50%);
     padding: .5em 1em; border-radius: 6px; background: var(--melasse); color: #fff; font-size: 1rem;
@@ -66,38 +61,31 @@
   .astuce.cachee { opacity: 0; }
 
   @media (max-aspect-ratio: 1/1) {
-    body { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
-    .rejoindre { flex-direction: row; gap: 4vw; border-left: 0; border-top: 3px solid var(--canne); text-align: left; align-items: center; }
-    .rejoindre img.logo { width: 14vw; } .qr { width: 24vw; margin: 0; } .rejoindre h2 { margin: 0; font-size: 5vw; }
-    .compteur { margin: 0 0 0 auto; padding: 0; } .question { font-size: 6vw; }
+    .entete img.logo { height: 9vh; } .question { font-size: 5vw; }
   }
   @media (prefers-reduced-motion: reduce) { .mot { transition: none; } .mot.dernier::after { animation: none; } }
 </style>
 </head>
 <body>
-  <main class="scene">
+  <header class="entete">
+    <img class="logo" src="assets/logo-pwwe.png" alt="Pa Wol Wonm Expérience" width="485" height="520">
     <h1 class="question" id="question"></h1>
-    <div class="nuage" id="nuage" aria-live="off">
-      <p class="vide" id="vide" hidden>Le nuage attend son premier mot.<br>Scannez le QR code pour l’écrire.</p>
-    </div>
-    <p class="pied">
-      <span id="dernier"></span>
-      <span class="etat" id="etat" hidden>Connexion interrompue, nouvelle tentative…</span>
-    </p>
+    <p class="compteur"><b id="total">0</b><span id="total-libelle">mot déposé</span></p>
+  </header>
+
+  <main class="nuage" id="nuage" aria-live="off">
+    <p class="vide" id="vide" hidden>Le nuage attend son premier mot.</p>
   </main>
 
-  <aside class="rejoindre">
-    <img class="logo" src="assets/logo-pwwe.png" alt="Pa Wol Wonm Expérience" width="485" height="520">
-    <h2>Ajoutez votre mot</h2>
-    <div class="qr" id="qr" role="img" aria-label="QR code vers la page de participation"></div>
-    <p class="adresse">Scannez, ou tapez <b id="adresse"></b></p>
-    <p class="compteur"><b id="total">0</b><span id="total-libelle">mot déposé</span></p>
-  </aside>
+  <p class="pied">
+    <span id="dernier"></span>
+    <span class="etat" id="etat" hidden>Connexion interrompue, nouvelle tentative…</span>
+  </p>
 
+  <p class="bulle" id="bulle" hidden></p>
   <p class="astuce" id="astuce">Touche F ou clic : plein écran</p>
 
 <script src="config.js"></script>
-<script src="assets/qrcode.js"></script>
 <script>
 (function () {
   "use strict";
@@ -107,7 +95,7 @@
   var PERIODE = 3000;       // intervalle de rafraîchissement, en millisecondes
   var MAX_MOTS = 110;       // nombre maximal de mots distincts affichés
   var POLICE = '900 100px "Londrina Solid", "Arial Narrow", Arial, sans-serif';
-  var COULEURS = ["#64360d", "#0f7fbd", "#9a6a3a", "#b46a0c", "#64360d", "#557a1c", "#2a1605", "#0b5c8c"];
+  var COULEURS = ["#64360d", "#0f7fbd", "#9a6a3a", "#b46a0c", "#557a1c", "#2a1605", "#0b5c8c"];
 
   var $ = function (id) { return document.getElementById(id); };
   var nuage = $("nuage");
@@ -117,16 +105,6 @@
   var cleDernier = "", donnees = [], echecs = 0;
 
   $("question").textContent = C.QUESTION || "En un mot, que vous évoque le rhum ?";
-
-  /* ---------- QR code et adresse ---------- */
-  var adresse = String(C.ADRESSE || "").trim() || location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
-  (function () {
-    var qr = qrcode(0, "M"); qr.addData(adresse); qr.make();
-    $("qr").innerHTML = qr.createSvgTag({ cellSize: 8, margin: 0, scalable: true });
-    var svg = $("qr").querySelector("svg");
-    if (svg) svg.querySelectorAll("path").forEach(function (p) { p.setAttribute("fill", "#2a1605"); });
-    $("adresse").textContent = adresse.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  })();
 
   /* ---------- Regroupement des mots ---------- */
   function cle(mot) {
@@ -225,6 +203,7 @@
       }
       vus[g.cle] = true;
       if (el.textContent !== g.affiche) el.textContent = g.affiche;
+      el.dataset.n = g.n;
       var e = p.taille / 100, x = p.x + p.taille * 0.17, y = p.y + p.taille * 0.05;
       var cible = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + e.toFixed(4) + ")";
       if (nouveau) {
@@ -239,6 +218,19 @@
       if (!vus[k]) { var el = elements[k]; delete elements[k]; el.classList.add("arrive"); setTimeout(function () { el.remove(); }, 600); }
     });
   }
+
+  /* ---------- Au survol d'un mot : combien de fois il a été cité ---------- */
+  var bulle = $("bulle");
+  nuage.addEventListener("mousemove", function (e) {
+    var el = e.target.closest ? e.target.closest(".mot") : null;
+    if (!el) { bulle.hidden = true; return; }
+    var n = Number(el.dataset.n) || 1;
+    bulle.textContent = el.textContent + " : cité " + n + " fois";
+    bulle.hidden = false;
+    var x = Math.min(e.clientX + 16, window.innerWidth - bulle.offsetWidth - 8), y = Math.max(e.clientY - bulle.offsetHeight - 12, 8);
+    bulle.style.transform = "translate(" + x + "px," + y + "px)";
+  });
+  nuage.addEventListener("mouseleave", function () { bulle.hidden = true; });
 
   /* ---------- Mise à jour ---------- */
   function recevoir(mots) {
@@ -257,6 +249,10 @@
     if (dernierTexte) {
       pied.appendChild(document.createTextNode("Dernier mot arrivé : "));
       var fort = document.createElement("strong"); fort.textContent = dernierTexte; pied.appendChild(fort);
+      var fois = cles.filter(function (k) { return k === derniereCle; }).length;
+      var compte = document.createElement("span"); compte.className = "fois";
+      compte.textContent = fois > 1 ? "cité " + fois + " fois" : "nouveau mot !";
+      pied.appendChild(compte);
     }
     dessiner();
   }

@@ -87,6 +87,11 @@
     display: flex; align-items: center; justify-content: center; min-height: 3.1rem; margin: 0;
     border: 2px solid var(--canne); border-radius: 6px; font-weight: 600; font-size: 1.125rem; cursor: pointer;
   }
+  .choix.seul { grid-template-columns: 1fr; }
+  .choix.seul label { justify-content: flex-start; padding: .5rem .9rem; font-size: 1.05rem; }
+  .choix.seul label::before { content: ""; flex: none; width: 1.15em; height: 1.15em; margin-right: .6em; border: 2px solid var(--canne); border-radius: 4px; background: #fff; }
+  .choix.seul input:checked + label::before { background: var(--ciel-profond) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/85% no-repeat; border-color: var(--ciel-profond); }
+  .facultatif { font-weight: 400; color: #5b4633; }
   .choix input { position: absolute; opacity: 0; pointer-events: none; }
   .choix input:checked + label { background: var(--brume); border-color: var(--ciel-profond); box-shadow: inset 0 0 0 1px var(--ciel-profond); }
   .choix input:focus-visible + label { outline: 3px solid var(--ciel-profond); outline-offset: 3px; }
@@ -124,7 +129,7 @@
       <div class="boutons">
         <button type="button" class="bouton" id="btn-atelier">
           <span class="avant">Envoyer mon mot, puis</span>
-          <span class="action">Être informé du prochain atelier</span>
+          <span class="action">Recevoir les dates des ateliers en premier</span>
         </button>
         <button type="button" class="bouton ciel" id="btn-insta">
           <span class="avant">Envoyer mon mot, puis</span>
@@ -134,13 +139,15 @@
           <span class="action">Envoyer mon mot</span>
         </button>
       </div>
+      <p class="retour" id="sortie"><button type="button" class="lien" id="btn-seul">Envoyer mon mot, sans suite</button></p>
     </form>
   </section>
 
   <!-- 2. Coordonnées pour le prochain atelier -->
   <section class="vue" id="vue-atelier" hidden>
-    <h2 id="titre-atelier" tabindex="-1">Prochain atelier PWWE</h2>
+    <h2 id="titre-atelier" tabindex="-1">Les ateliers PWWE</h2>
     <p class="chapo" id="merci-mot"></p>
+    <p class="aide">Plusieurs formats, du rhum blanc au rhum vieux. En décembre : un atelier blanc et un atelier vieux, dates à venir. Sur cette liste, vous recevez les dates en premier et vous choisissez l’atelier qui vous tente.</p>
     <form id="form-atelier" novalidate>
       <div class="duo">
         <div class="champ">
@@ -162,17 +169,16 @@
       </div>
       <p class="aide">Téléphone ou e-mail : un seul suffit.</p>
       <fieldset>
-        <legend>Je souhaite m’inscrire pour le prochain atelier</legend>
-        <div class="choix">
-          <input type="radio" name="atelier" id="atelier-oui" value="Oui" checked><label for="atelier-oui">Oui</label>
-          <input type="radio" name="atelier" id="atelier-non" value="Non"><label for="atelier-non">Non</label>
+        <legend>Et pour décembre ? <span class="facultatif">(facultatif)</span></legend>
+        <div class="choix seul">
+          <input type="checkbox" name="atelier" id="atelier-oui" value="Oui"><label for="atelier-oui">Comptez sur moi pour un atelier de décembre</label>
         </div>
-        <p class="aide">Si non, nous vous informons simplement des prochaines dates.</p>
+        <p class="aide">Sans engagement : cela nous aide à prévoir le nombre de places.</p>
       </fieldset>
       <p class="erreur" id="erreur-atelier" role="alert" hidden></p>
       <div class="boutons">
         <button type="submit" class="bouton simple" id="btn-envoyer">
-          <span class="action">Envoyer mes coordonnées</span>
+          <span class="action">Recevoir les dates en premier</span>
         </button>
       </div>
       <p class="mention">Vos coordonnées servent uniquement à PWWE pour vous informer de ses ateliers. Elles ne sont transmises à personne.</p>
@@ -182,7 +188,7 @@
   <!-- 3. Fin du parcours « atelier » : proposition Instagram -->
   <section class="vue" id="vue-fin" hidden>
     <h2 id="titre-fin" tabindex="-1"></h2>
-    <p class="chapo">Nous vous écrivons dès que la date du prochain atelier est fixée.</p>
+    <p class="chapo">Vous êtes sur la liste : vous recevrez les dates de nos ateliers en premier, à commencer par celles de décembre.</p>
     <div id="fin-telephone">
       <div class="boutons">
         <a class="bouton ciel" id="lien-insta" href="#" rel="noopener">
@@ -205,13 +211,13 @@
     <p class="chapo" id="texte-merci"></p>
     <div id="merci-telephone">
       <div class="boutons">
-        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Être informé du prochain atelier</span></button>
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Recevoir les dates des ateliers en premier</span></button>
       </div>
       <p class="retour"><button type="button" class="lien" data-recommencer>Ajouter un autre mot</button></p>
     </div>
     <div id="merci-kiosque" hidden>
       <div class="boutons">
-        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Être informé du prochain atelier</span></button>
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Recevoir les dates des ateliers en premier</span></button>
       </div>
       <p class="aide">Pour Instagram, scannez le QR code du stand avec votre téléphone.</p>
       <div class="jauge" aria-hidden="true"><i></i></div>
@@ -242,7 +248,7 @@
   document.querySelectorAll("[data-compte]").forEach(function (e) { e.textContent = COMPTE; });
   if (DEMO) $("demo").hidden = false;
   if (KIOSQUE) {
-    $("btn-atelier").hidden = true; $("btn-insta").hidden = true; $("btn-kiosque").hidden = false;
+    $("btn-atelier").hidden = true; $("btn-insta").hidden = true; $("sortie").hidden = true; $("btn-kiosque").hidden = false;
     $("fin-telephone").hidden = true; $("fin-kiosque").hidden = false;
     $("merci-telephone").hidden = true; $("merci-kiosque").hidden = false;
   }
@@ -331,12 +337,12 @@
       ? "« " + mot + " » rejoint le nuage : regardez l’écran du stand."
       : "Votre mot est sur l’écran du stand.";
     montrer("vue-merci", "titre-merci");
-    if (KIOSQUE) retourAuto(9, "vue-merci");
+    if (KIOSQUE) retourAuto(15, "vue-merci");
   }
   function versAtelier() {
     $("merci-mot").textContent = dernierMot
-      ? "Merci ! « " + dernierMot + " » rejoint le nuage sur l’écran du stand. Laissez-nous de quoi vous prévenir :"
-      : "Laissez-nous de quoi vous prévenir :";
+      ? "Merci ! « " + dernierMot + " » rejoint le nuage sur l’écran du stand. Laissez-nous de quoi vous joindre :"
+      : "Laissez-nous de quoi vous joindre :";
     montrer("vue-atelier", "titre-atelier");
     if (KIOSQUE) surveillerInactivite();
   }
@@ -374,6 +380,11 @@
     envoyerMot(mot, { keepalive: true });
     partirSurInstagram(mot);
   });
+  $("btn-seul").addEventListener("click", function () {
+    var mot = motSaisi();
+    if (!mot) { $("mot").focus(); return; }
+    dernierMot = mot; envoyerMot(mot); versMerci(mot);
+  });
   $("sans-mot").addEventListener("click", function () {
     $("erreur-mot").hidden = true;
     if (suite === "insta") partirSurInstagram(""); else versAtelier();
@@ -403,7 +414,7 @@
     var telephone = nettoyer($("telephone").value, 25), email = nettoyer($("email").value, 120);
     if (!prenom) return erreurAtelier("Indiquez votre prénom.", "prenom");
     if (!nom) return erreurAtelier("Indiquez votre nom.", "nom");
-    if (!telephone && !email) return erreurAtelier("Indiquez un téléphone ou un e-mail pour que nous puissions vous prévenir.", "telephone");
+    if (!telephone && !email) return erreurAtelier("Indiquez un téléphone ou un e-mail pour que nous puissions vous joindre.", "telephone");
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return erreurAtelier("Cet e-mail semble incomplet. Vérifiez-le.", "email");
     if (telephone && telephone.replace(/\D/g, "").length < 8) return erreurAtelier("Ce numéro semble incomplet. Vérifiez-le.", "telephone");
 
@@ -411,7 +422,7 @@
     bouton.disabled = true; libelle.textContent = "Envoi en cours…";
     poster({
       type: "inscription", id: identifiant(), prenom: prenom, nom: nom, telephone: telephone, email: email,
-      atelier: document.querySelector('input[name="atelier"]:checked').value, mot: dernierMot, source: SOURCE
+      atelier: $("atelier-oui").checked ? "Oui" : "Non", mot: dernierMot, source: SOURCE
     }).then(function (r) {
       if (!r || !r.ok) throw new Error((r && r.erreur) || "refus");
       $("titre-fin").textContent = "C’est noté, " + prenom + " !";
@@ -419,9 +430,9 @@
       montrer("vue-fin", "titre-fin");
       if (KIOSQUE) retourAuto(10, "vue-fin");
     }).catch(function () {
-      erreurAtelier("L’envoi n’a pas abouti. Vérifiez la connexion, puis appuyez de nouveau sur « Envoyer mes coordonnées ».");
+      erreurAtelier("L’envoi n’a pas abouti. Vérifiez la connexion, puis appuyez de nouveau sur « Recevoir les dates en premier ».");
     }).finally(function () {
-      bouton.disabled = false; libelle.textContent = "Envoyer mes coordonnées";
+      bouton.disabled = false; libelle.textContent = "Recevoir les dates en premier";
     });
   });
 
