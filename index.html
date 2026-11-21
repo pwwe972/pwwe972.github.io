@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Votre mot sur le nuage PWWE</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/icone.png">
+<link rel="apple-touch-icon" href="assets/icone.png">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  body { min-height: 100vh; min-height: 100dvh; }
+  main {
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+  .demo {
+    margin: 0; padding: .4rem 1.25rem;
+    background: var(--melasse); color: #fff;
+    font-size: .875rem; text-align: center;
+  }
+  .tete img { display: block; width: 5.5rem; height: auto; margin-left: -.35rem; }
+
+  h1, h2 {
+    font-family: var(--titre); font-weight: 900; color: var(--canne);
+    line-height: 1.04; letter-spacing: .005em; margin: 1.1rem 0 0;
+    text-wrap: balance;
+  }
+  h1 { font-size: clamp(2.1rem, 9.4vw, 2.85rem); }
+  h2 { font-size: clamp(1.9rem, 8.4vw, 2.5rem); }
+  .chapo { margin: .6rem 0 0; font-size: 1.125rem; }
+  .chapo strong { font-weight: 600; }
+
+  /* Champ du mot : un cartouche, comme l'étiquette de la bouteille du logo */
+  .cartouche {
+    display: block; width: 100%;
+    margin-top: 1.35rem; padding: .7rem .9rem .6rem;
+    border: 3px solid var(--canne); border-radius: 6px;
+    background: var(--papier); color: var(--ciel-profond);
+    font-family: var(--titre); font-weight: 900; font-size: 2rem; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .02em;
+    box-shadow: inset 0 0 0 4px var(--papier), inset 0 0 0 5px var(--canne);
+    -webkit-appearance: none; appearance: none;
+  }
+  .cartouche::placeholder { color: #b9a48f; opacity: 1; }
+  .cartouche:focus { outline: none; border-color: var(--ciel-profond);
+    box-shadow: inset 0 0 0 4px var(--papier), inset 0 0 0 5px var(--ciel-profond); }
+
+  .aide { margin: .55rem 0 0; font-size: .95rem; color: #5b4633; }
+  .erreur { margin: .6rem 0 0; font-weight: 600; color: var(--alerte); }
+  .lien {
+    background: none; border: 0; padding: 0; font: inherit; font-weight: 600;
+    color: var(--ciel-profond); text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+  }
+
+  .boutons { display: grid; gap: .75rem; margin-top: 1.25rem; }
+  .bouton {
+    display: block; width: 100%; min-height: 4.25rem;
+    padding: .7rem 1rem .75rem; border: 3px solid var(--canne); border-radius: 6px;
+    font-family: var(--texte); text-align: left; text-decoration: none; cursor: pointer;
+    background: var(--canne); color: #fff;
+    transition: transform .08s ease;
+  }
+  .bouton:active { transform: translateY(2px); }
+  .bouton .avant { display: block; font-size: .95rem; font-weight: 500; opacity: .92; }
+  .bouton .action { display: block; font-family: var(--titre); font-weight: 900; font-size: 1.55rem; line-height: 1.08; letter-spacing: .01em; }
+  .bouton.ciel { background: var(--ciel); border-color: var(--ciel); color: var(--melasse); }
+  .bouton.simple { min-height: 3.5rem; }
+  .bouton[disabled] { opacity: .55; cursor: progress; }
+
+  /* Formulaire d'inscription */
+  .champ { margin-top: .95rem; }
+  .champ label, legend { display: block; padding: 0; font-weight: 600; font-size: 1rem; margin-bottom: .3rem; }
+  .champ input {
+    display: block; width: 100%; padding: .7rem .8rem;
+    border: 2px solid var(--canne); border-radius: 6px; background: #fff; color: var(--melasse);
+    font: 500 1.125rem/1.3 var(--texte);
+    -webkit-appearance: none; appearance: none;
+  }
+  .champ input:focus { outline: none; border-color: var(--ciel-profond); box-shadow: 0 0 0 3px var(--brume); }
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  fieldset { border: 0; padding: 0; margin: 1.1rem 0 0; min-width: 0; }
+  .choix { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .choix label {
+    display: flex; align-items: center; justify-content: center; min-height: 3.1rem; margin: 0;
+    border: 2px solid var(--canne); border-radius: 6px; font-weight: 600; font-size: 1.125rem; cursor: pointer;
+  }
+  .choix input { position: absolute; opacity: 0; pointer-events: none; }
+  .choix input:checked + label { background: var(--brume); border-color: var(--ciel-profond); box-shadow: inset 0 0 0 1px var(--ciel-profond); }
+  .choix input:focus-visible + label { outline: 3px solid var(--ciel-profond); outline-offset: 3px; }
+  .mention { margin: 1rem 0 0; font-size: .875rem; color: #5b4633; }
+  .insta { font-family: var(--titre); font-weight: 900; font-size: 1.9rem; color: var(--ciel-profond); margin: .4rem 0 0; }
+  .retour { margin-top: 1.25rem; }
+  .jauge { height: 4px; margin-top: 1.5rem; background: var(--brume); border-radius: 2px; overflow: hidden; }
+  .jauge i { display: block; height: 100%; width: 100%; background: var(--ciel); transform-origin: left; }
+  h2[tabindex="-1"]:focus { outline: none; }
+  .invisible { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .vue { animation: entree .28s ease both; }
+  @keyframes entree { from { opacity: 0; transform: translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { .vue { animation: none; } .bouton { transition: none; } }
+</style>
+</head>
+<body>
+<p class="demo" id="demo" hidden>Mode démo : rien n’est enregistré tant que l’adresse API manque dans config.js.</p>
+<main>
+  <header class="tete">
+    <img src="assets/logo-pwwe.png" alt="Pa Wol Wonm Expérience" width="485" height="520">
+  </header>
+
+  <!-- 1. Le mot -->
+  <section class="vue" id="vue-mot">
+    <h1 id="question"></h1>
+    <form id="form-mot" novalidate>
+      <label class="invisible" for="mot">Votre mot</label>
+      <input class="cartouche" id="mot" name="mot" type="text" maxlength="30"
+             placeholder="Votre mot" autocomplete="off" autocapitalize="none" enterkeyhint="done" aria-describedby="aide-mot">
+      <p class="aide" id="aide-mot">Il s’affiche tout de suite sur l’écran du stand.</p>
+      <p class="erreur" id="erreur-mot" role="alert" hidden>
+        Tapez d’abord votre mot. <button type="button" class="lien" id="sans-mot">Continuer sans mot</button>
+      </p>
+      <div class="boutons">
+        <button type="button" class="bouton" id="btn-atelier">
+          <span class="avant">Envoyer mon mot, puis</span>
+          <span class="action">Être informé du prochain atelier</span>
+        </button>
+        <button type="button" class="bouton ciel" id="btn-insta">
+          <span class="avant">Envoyer mon mot, puis</span>
+          <span class="action">Suivre PWWE sur Instagram</span>
+        </button>
+        <button type="submit" class="bouton simple" id="btn-kiosque" hidden>
+          <span class="action">Envoyer mon mot</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- 2. Coordonnées pour le prochain atelier -->
+  <section class="vue" id="vue-atelier" hidden>
+    <h2 id="titre-atelier" tabindex="-1">Prochain atelier PWWE</h2>
+    <p class="chapo" id="merci-mot"></p>
+    <form id="form-atelier" novalidate>
+      <div class="duo">
+        <div class="champ">
+          <label for="prenom">Prénom</label>
+          <input id="prenom" name="prenom" type="text" autocomplete="given-name" autocapitalize="words" maxlength="60" required>
+        </div>
+        <div class="champ">
+          <label for="nom">Nom</label>
+          <input id="nom" name="nom" type="text" autocomplete="family-name" autocapitalize="words" maxlength="60" required>
+        </div>
+      </div>
+      <div class="champ">
+        <label for="telephone">Téléphone</label>
+        <input id="telephone" name="telephone" type="tel" autocomplete="tel" inputmode="tel" maxlength="25">
+      </div>
+      <div class="champ">
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="none" maxlength="120">
+      </div>
+      <p class="aide">Téléphone ou e-mail : un seul suffit.</p>
+      <fieldset>
+        <legend>Je souhaite m’inscrire pour le prochain atelier</legend>
+        <div class="choix">
+          <input type="radio" name="atelier" id="atelier-oui" value="Oui" checked><label for="atelier-oui">Oui</label>
+          <input type="radio" name="atelier" id="atelier-non" value="Non"><label for="atelier-non">Non</label>
+        </div>
+        <p class="aide">Si non, nous vous informons simplement des prochaines dates.</p>
+      </fieldset>
+      <p class="erreur" id="erreur-atelier" role="alert" hidden></p>
+      <div class="boutons">
+        <button type="submit" class="bouton simple" id="btn-envoyer">
+          <span class="action">Envoyer mes coordonnées</span>
+        </button>
+      </div>
+      <p class="mention">Vos coordonnées servent uniquement à PWWE pour vous informer de ses ateliers. Elles ne sont transmises à personne.</p>
+    </form>
+  </section>
+
+  <!-- 3. Fin du parcours « atelier » : proposition Instagram -->
+  <section class="vue" id="vue-fin" hidden>
+    <h2 id="titre-fin" tabindex="-1"></h2>
+    <p class="chapo">Nous vous écrivons dès que la date du prochain atelier est fixée.</p>
+    <div id="fin-telephone">
+      <div class="boutons">
+        <a class="bouton ciel" id="lien-insta" href="#" rel="noopener">
+          <span class="avant">En attendant,</span>
+          <span class="action">Suivre PWWE sur Instagram</span>
+        </a>
+      </div>
+      <p class="retour"><button type="button" class="lien" data-recommencer>Terminer</button></p>
+    </div>
+    <div id="fin-kiosque" hidden>
+      <p class="chapo">En attendant, suivez-nous sur Instagram :</p>
+      <p class="insta" data-compte></p>
+      <div class="jauge" aria-hidden="true"><i></i></div>
+    </div>
+  </section>
+
+  <!-- 4. Merci (retour d'Instagram, ou tablette du stand) -->
+  <section class="vue" id="vue-merci" hidden>
+    <h2 id="titre-merci" tabindex="-1">Merci !</h2>
+    <p class="chapo" id="texte-merci"></p>
+    <div id="merci-telephone">
+      <div class="boutons">
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Être informé du prochain atelier</span></button>
+      </div>
+      <p class="retour"><button type="button" class="lien" data-recommencer>Ajouter un autre mot</button></p>
+    </div>
+    <div id="merci-kiosque" hidden>
+      <div class="boutons">
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Être informé du prochain atelier</span></button>
+      </div>
+      <p class="aide">Pour Instagram, scannez le QR code du stand avec votre téléphone.</p>
+      <div class="jauge" aria-hidden="true"><i></i></div>
+    </div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  "use strict";
+  var C = window.PWWE || {};
+  var API = String(C.API || "").trim();
+  var DEMO = !/^https:\/\/script\.google(usercontent)?\.com\//.test(API);
+  var INSTAGRAM = C.INSTAGRAM || "https://www.instagram.com/pwwe972";
+  var COMPTE = C.COMPTE_INSTAGRAM || "@pwwe972";
+  var KIOSQUE = new URLSearchParams(location.search).has("kiosque");
+  var SOURCE = KIOSQUE ? "tablette" : "téléphone";
+  var CLE_FILE = "pwwe-file", CLE_RETOUR = "pwwe-retour", CLE_DEMO = "pwwe-demo-mots";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var vues = ["vue-mot", "vue-atelier", "vue-fin", "vue-merci"];
+  var dernierMot = "";
+  var minuteur = null;
+
+  $("question").textContent = C.QUESTION || "En un mot, que vous évoque le rhum ?";
+  $("lien-insta").href = INSTAGRAM;
+  document.querySelectorAll("[data-compte]").forEach(function (e) { e.textContent = COMPTE; });
+  if (DEMO) $("demo").hidden = false;
+  if (KIOSQUE) {
+    $("btn-atelier").hidden = true; $("btn-insta").hidden = true; $("btn-kiosque").hidden = false;
+    $("fin-telephone").hidden = true; $("fin-kiosque").hidden = false;
+    $("merci-telephone").hidden = true; $("merci-kiosque").hidden = false;
+  }
+
+  /* ---------- Outils ---------- */
+  function identifiant() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+  }
+  function nettoyer(texte, max) {
+    return String(texte || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
+  }
+  function lire(cle) { try { return JSON.parse(localStorage.getItem(cle)) || []; } catch (e) { return []; } }
+  function ecrire(cle, v) { try { localStorage.setItem(cle, JSON.stringify(v)); } catch (e) {} }
+
+  /* ---------- Envois ---------- */
+  function poster(charge, options) {
+    options = options || {};
+    if (DEMO) {
+      if (charge.type === "mot") { var d = lire(CLE_DEMO); d.push(charge.mot); ecrire(CLE_DEMO, d); }
+      return new Promise(function (ok) { setTimeout(function () { ok({ ok: true, demo: true }); }, 350); });
+    }
+    var ctrl = new AbortController();
+    var delai = setTimeout(function () { ctrl.abort(); }, options.delai || 20000);
+    return fetch(API, {
+      method: "POST",
+      // text/plain : requête « simple », donc sans pré-vérification CORS (Apps Script n'y répond pas)
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(charge),
+      keepalive: !!options.keepalive,
+      credentials: "omit",
+      redirect: "follow",
+      signal: ctrl.signal
+    }).then(function (r) { return r.json(); })
+      .finally(function () { clearTimeout(delai); });
+  }
+
+  // Les mots passent par une file conservée sur l'appareil : si le réseau flanche
+  // ou si la page se ferme (départ vers Instagram), ils repartent à la prochaine occasion.
+  // Le serveur ignore les doublons grâce à l'identifiant.
+  function retirerDeFile(id) { ecrire(CLE_FILE, lire(CLE_FILE).filter(function (c) { return c.id !== id; })); }
+  function envoyerMot(mot, options) {
+    var charge = { type: "mot", id: identifiant(), mot: mot, source: SOURCE, t: Date.now() };
+    var file = lire(CLE_FILE); file.push(charge); ecrire(CLE_FILE, file);
+    return poster(charge, options).then(function () { retirerDeFile(charge.id); }).catch(function () {});
+  }
+  var vidage = false;
+  function viderFile() {
+    if (vidage) return;
+    var file = lire(CLE_FILE).filter(function (c) { return Date.now() - c.t < 12 * 3600 * 1000; });
+    ecrire(CLE_FILE, file);
+    if (!file.length) return;
+    vidage = true;
+    file.reduce(function (suite, charge) {
+      return suite.then(function () { return poster(charge).then(function () { retirerDeFile(charge.id); }); });
+    }, Promise.resolve()).catch(function () {}).finally(function () { vidage = false; });
+  }
+  window.addEventListener("online", viderFile);
+
+  /* ---------- Navigation entre les vues ---------- */
+  function montrer(id, titre) {
+    clearTimeout(minuteur);
+    vues.forEach(function (v) { $(v).hidden = v !== id; });
+    window.scrollTo(0, 0);
+    if (titre) $(titre).focus({ preventScroll: true });
+  }
+  function recommencer() {
+    $("form-mot").reset(); $("form-atelier").reset();
+    $("erreur-mot").hidden = true; $("erreur-atelier").hidden = true;
+    dernierMot = "";
+    try { sessionStorage.removeItem(CLE_RETOUR); } catch (e) {}
+    montrer("vue-mot");
+    if (KIOSQUE) $("mot").focus();
+  }
+  function retourAuto(secondes, vue) {
+    var barre = $(vue).querySelector(".jauge i");
+    if (barre) {
+      barre.style.transition = "none"; barre.style.transform = "scaleX(1)";
+      void barre.offsetWidth;
+      barre.style.transition = "transform " + secondes + "s linear"; barre.style.transform = "scaleX(0)";
+    }
+    minuteur = setTimeout(recommencer, secondes * 1000);
+  }
+  function versMerci(mot) {
+    $("texte-merci").textContent = mot
+      ? "« " + mot + " » rejoint le nuage : regardez l’écran du stand."
+      : "Votre mot est sur l’écran du stand.";
+    montrer("vue-merci", "titre-merci");
+    if (KIOSQUE) retourAuto(9, "vue-merci");
+  }
+  function versAtelier() {
+    $("merci-mot").textContent = dernierMot
+      ? "Merci ! « " + dernierMot + " » rejoint le nuage sur l’écran du stand. Laissez-nous de quoi vous prévenir :"
+      : "Laissez-nous de quoi vous prévenir :";
+    montrer("vue-atelier", "titre-atelier");
+    if (KIOSQUE) surveillerInactivite();
+  }
+  // Sur la tablette du stand, un formulaire abandonné s'efface tout seul.
+  function surveillerInactivite() {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(recommencer, 90000);
+  }
+  if (KIOSQUE) $("form-atelier").addEventListener("input", surveillerInactivite);
+
+  /* ---------- Étape 1 : le mot ---------- */
+  function motSaisi() { return nettoyer($("mot").value, 30); }
+  function exigerMot() {
+    var mot = motSaisi();
+    if (!mot) { $("erreur-mot").hidden = false; $("mot").focus(); }
+    return mot;
+  }
+  $("mot").addEventListener("input", function () { $("erreur-mot").hidden = true; });
+  $("mot").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !KIOSQUE) { e.preventDefault(); if (motSaisi()) $("mot").blur(); }
+  });
+
+  var suite = null; // « atelier » ou « insta », pour le lien « Continuer sans mot »
+  $("btn-atelier").addEventListener("click", function () {
+    suite = "atelier";
+    var mot = exigerMot(); if (!mot) return;
+    dernierMot = mot; envoyerMot(mot); versAtelier();
+  });
+  $("btn-insta").addEventListener("click", function () {
+    suite = "insta";
+    var mot = exigerMot(); if (!mot) return;
+    dernierMot = mot;
+    // L'envoi continue même si la page se ferme (keepalive), et le départ vers Instagram
+    // reste dans le geste du visiteur : c'est ce qui permet au téléphone d'ouvrir l'application.
+    envoyerMot(mot, { keepalive: true });
+    partirSurInstagram(mot);
+  });
+  $("sans-mot").addEventListener("click", function () {
+    $("erreur-mot").hidden = true;
+    if (suite === "insta") partirSurInstagram(""); else versAtelier();
+  });
+  function partirSurInstagram(mot) {
+    try { sessionStorage.setItem(CLE_RETOUR, mot || "-"); } catch (e) {}
+    versMerci(mot);
+    window.location.href = INSTAGRAM;
+  }
+  $("form-mot").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!KIOSQUE) return;
+    var mot = motSaisi();
+    if (!mot) { $("mot").focus(); return; }
+    dernierMot = mot; envoyerMot(mot); $("mot").blur(); versMerci(mot);
+  });
+
+  /* ---------- Étape 2 : les coordonnées ---------- */
+  function erreurAtelier(message, champ) {
+    $("erreur-atelier").textContent = message; $("erreur-atelier").hidden = false;
+    if (champ) $(champ).focus();
+  }
+  $("form-atelier").addEventListener("submit", function (e) {
+    e.preventDefault();
+    $("erreur-atelier").hidden = true;
+    var prenom = nettoyer($("prenom").value, 60), nom = nettoyer($("nom").value, 60);
+    var telephone = nettoyer($("telephone").value, 25), email = nettoyer($("email").value, 120);
+    if (!prenom) return erreurAtelier("Indiquez votre prénom.", "prenom");
+    if (!nom) return erreurAtelier("Indiquez votre nom.", "nom");
+    if (!telephone && !email) return erreurAtelier("Indiquez un téléphone ou un e-mail pour que nous puissions vous prévenir.", "telephone");
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return erreurAtelier("Cet e-mail semble incomplet. Vérifiez-le.", "email");
+    if (telephone && telephone.replace(/\D/g, "").length < 8) return erreurAtelier("Ce numéro semble incomplet. Vérifiez-le.", "telephone");
+
+    var bouton = $("btn-envoyer"), libelle = bouton.querySelector(".action");
+    bouton.disabled = true; libelle.textContent = "Envoi en cours…";
+    poster({
+      type: "inscription", id: identifiant(), prenom: prenom, nom: nom, telephone: telephone, email: email,
+      atelier: document.querySelector('input[name="atelier"]:checked').value, mot: dernierMot, source: SOURCE
+    }).then(function (r) {
+      if (!r || !r.ok) throw new Error((r && r.erreur) || "refus");
+      $("titre-fin").textContent = "C’est noté, " + prenom + " !";
+      $("form-atelier").reset();
+      montrer("vue-fin", "titre-fin");
+      if (KIOSQUE) retourAuto(10, "vue-fin");
+    }).catch(function () {
+      erreurAtelier("L’envoi n’a pas abouti. Vérifiez la connexion, puis appuyez de nouveau sur « Envoyer mes coordonnées ».");
+    }).finally(function () {
+      bouton.disabled = false; libelle.textContent = "Envoyer mes coordonnées";
+    });
+  });
+
+  /* ---------- Fins de parcours ---------- */
+  document.querySelectorAll("[data-recommencer]").forEach(function (b) { b.addEventListener("click", recommencer); });
+  document.querySelectorAll("[data-vers-atelier]").forEach(function (b) { b.addEventListener("click", versAtelier); });
+
+  // Retour depuis Instagram (page rechargée ou restaurée par le navigateur)
+  function auRetour() {
+    viderFile();
+    var retour = null;
+    try { retour = sessionStorage.getItem(CLE_RETOUR); } catch (e) {}
+    if (retour && $("vue-mot").hidden === false) { dernierMot = retour === "-" ? "" : retour; versMerci(dernierMot); }
+  }
+  window.addEventListener("pageshow", auRetour);
+  if (KIOSQUE) $("mot").focus();
+})();
+</script>
+</body>
+</html>

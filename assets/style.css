@@ -1,0 +1,37 @@
+/* Base commune aux trois pages PWWE */
+@font-face { font-family: "Londrina Solid"; font-weight: 400; font-display: swap;
+  src: url("fonts/londrina-solid-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Londrina Solid"; font-weight: 900; font-display: swap;
+  src: url("fonts/londrina-solid-latin-900-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap;
+  src: url("fonts/barlow-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap;
+  src: url("fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-display: swap;
+  src: url("fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+
+:root {
+  --canne: #64360d;        /* brun du trait du logo */
+  --melasse: #2a1605;      /* texte courant */
+  --bois: #9a6a3a;         /* brun clair, mots secondaires */
+  --ciel: #33a9e1;         /* bleu du logo */
+  --ciel-profond: #0f7fbd; /* bleu lisible en texte sur blanc */
+  --brume: #e6f4fb;        /* voile bleu très clair */
+  --papier: #ffffff;
+  --alerte: #a3200f;
+  --titre: "Londrina Solid", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --texte: "Barlow", "Helvetica Neue", Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--melasse);
+  font-family: var(--texte);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+:focus-visible { outline: 3px solid var(--ciel-profond); outline-offset: 3px; }
+[hidden] { display: none !important; }
