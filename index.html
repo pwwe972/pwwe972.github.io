@@ -129,7 +129,7 @@
       <div class="boutons">
         <button type="button" class="bouton" id="btn-atelier">
           <span class="avant">Envoyer mon mot, puis</span>
-          <span class="action">Recevoir les dates des ateliers en premier</span>
+          <span class="action">Recevoir les dates des ateliers</span>
         </button>
         <button type="button" class="bouton ciel" id="btn-insta">
           <span class="avant">Envoyer mon mot, puis</span>
@@ -147,7 +147,7 @@
   <section class="vue" id="vue-atelier" hidden>
     <h2 id="titre-atelier" tabindex="-1">Les ateliers PWWE</h2>
     <p class="chapo" id="merci-mot"></p>
-    <p class="aide">Plusieurs formats, du rhum blanc au rhum vieux. En décembre : un atelier blanc et un atelier vieux, dates à venir. Sur cette liste, vous recevez les dates en premier et vous choisissez l’atelier qui vous tente.</p>
+    <p class="aide">Plusieurs formats, du rhum blanc au rhum vieux. En décembre : un atelier blanc et un atelier vieux, dates à venir. Sur cette liste, vous recevez les dates dès qu’elles sont fixées, avant leur annonce sur Instagram, et vous choisissez l’atelier qui vous tente.</p>
     <form id="form-atelier" novalidate>
       <div class="duo">
         <div class="champ">
@@ -178,7 +178,7 @@
       <p class="erreur" id="erreur-atelier" role="alert" hidden></p>
       <div class="boutons">
         <button type="submit" class="bouton simple" id="btn-envoyer">
-          <span class="action">Recevoir les dates en premier</span>
+          <span class="action">Recevoir les dates</span>
         </button>
       </div>
       <p class="mention">Vos coordonnées servent uniquement à PWWE pour vous informer de ses ateliers. Elles ne sont transmises à personne.</p>
@@ -188,7 +188,7 @@
   <!-- 3. Fin du parcours « atelier » : proposition Instagram -->
   <section class="vue" id="vue-fin" hidden>
     <h2 id="titre-fin" tabindex="-1"></h2>
-    <p class="chapo">Vous êtes sur la liste : vous recevrez les dates de nos ateliers en premier, à commencer par celles de décembre.</p>
+    <p class="chapo">Vous êtes sur la liste : nous vous envoyons les dates de nos ateliers dès qu’elles sont fixées, à commencer par celles de décembre.</p>
     <div id="fin-telephone">
       <div class="boutons">
         <a class="bouton ciel" id="lien-insta" href="#" rel="noopener">
@@ -211,13 +211,13 @@
     <p class="chapo" id="texte-merci"></p>
     <div id="merci-telephone">
       <div class="boutons">
-        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Recevoir les dates des ateliers en premier</span></button>
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Recevoir les dates des ateliers</span></button>
       </div>
-      <p class="retour"><button type="button" class="lien" data-recommencer>Ajouter un autre mot</button></p>
+      <p class="retour"><button type="button" class="lien" data-recommencer>Ajouter un mot</button></p>
     </div>
     <div id="merci-kiosque" hidden>
       <div class="boutons">
-        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Recevoir les dates des ateliers en premier</span></button>
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action">Recevoir les dates des ateliers</span></button>
       </div>
       <p class="aide">Pour Instagram, scannez le QR code du stand avec votre téléphone.</p>
       <div class="jauge" aria-hidden="true"><i></i></div>
@@ -335,7 +335,7 @@
   function versMerci(mot) {
     $("texte-merci").textContent = mot
       ? "« " + mot + " » rejoint le nuage : regardez l’écran du stand."
-      : "Votre mot est sur l’écran du stand.";
+      : "Merci de votre visite. Vous pouvez encore ajouter votre mot au nuage.";
     montrer("vue-merci", "titre-merci");
     if (KIOSQUE) retourAuto(15, "vue-merci");
   }
@@ -430,9 +430,9 @@
       montrer("vue-fin", "titre-fin");
       if (KIOSQUE) retourAuto(10, "vue-fin");
     }).catch(function () {
-      erreurAtelier("L’envoi n’a pas abouti. Vérifiez la connexion, puis appuyez de nouveau sur « Recevoir les dates en premier ».");
+      erreurAtelier("L’envoi n’a pas abouti. Vérifiez la connexion, puis appuyez de nouveau sur « Recevoir les dates ».");
     }).finally(function () {
-      bouton.disabled = false; libelle.textContent = "Recevoir les dates en premier";
+      bouton.disabled = false; libelle.textContent = "Recevoir les dates";
     });
   });
 
