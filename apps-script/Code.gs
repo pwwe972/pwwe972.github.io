@@ -21,10 +21,14 @@ var LONGUEUR_MAX_MOT = 30;
 /* ------------------------------------------------------------------ */
 
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu('PWWE')
+  var menu = SpreadsheetApp.getUi().createMenu('PWWE')
     .addItem('Préparer les onglets', 'installer')
-    .addItem('Vider le nuage de mots…', 'viderLeNuage')
-    .addToUi();
+    .addItem('Vider le nuage de mots…', 'viderLeNuage');
+  // Liste complémentaire de mots bloqués : présente seulement si le fichier MotsBloques.gs accompagne ce script.
+  var complement = typeof completerMotsBloques === 'function';
+  if (complement) menu.addItem('Compléter les mots bloqués', 'completerMotsBloques');
+  menu.addToUi();
+  if (complement) { try { completerMotsBloquesUneFois_(); } catch (e) { /* sans gravité : le menu permet de le refaire */ } }
 }
 
 /** À lancer une fois : crée les trois onglets et leurs en-têtes. */
