@@ -40,7 +40,7 @@ function installer() {
   var bloques = preparerOnglet_(classeur, ONGLET_BLOQUES, ['Mot à bloquer (un par ligne)']);
   if (bloques.getLastRow() < 2) {
     var exemples = ['merde', 'putain', 'pute', 'con', 'connard', 'connasse', 'salope', 'salaud', 'encule',
-                    'bite', 'couille', 'nique', 'ntm', 'fdp', 'pd', 'batard', 'cul', 'chier', 'fuck', 'shit',
+                    'bite', 'couille', 'ntm', 'fdp', 'pd', 'batard', 'chier', 'fuck', 'shit',
                     'bitch', 'kounia', 'kouni manman', 'makoume', 'isalop'];
     bloques.getRange(2, 1, exemples.length, 1).setValues(exemples.map(function (m) { return [m]; }));
   }
@@ -124,6 +124,7 @@ function doPost(e) {
 function enregistrerMot_(d) {
   var mot = propre_(d.mot, LONGUEUR_MAX_MOT);
   if (!mot || !cle_(mot)) return { ok: false, erreur: 'mot vide' };
+  if (mot.split(' ').length > 2) return { ok: false, erreur: 'deux mots au plus' };   // un mot, ou deux séparés par un seul espace
   if (estBloque_(mot)) return { ok: true, masque: true };   // réponse identique côté visiteur, mais rien n'est écrit
   feuille_(ONGLET_MOTS).appendRow([new Date(), texte_(mot), texte_(propre_(d.source, 20))]);
   CacheService.getScriptCache().remove('mots');
@@ -135,6 +136,7 @@ function enregistrerInscription_(d) {
   var telephone = propre_(d.telephone, 25), email = propre_(d.email, 120);
   if (!prenom || !nom) return { ok: false, erreur: 'nom et prénom requis' };
   if (!telephone && !email) return { ok: false, erreur: 'téléphone ou e-mail requis' };
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return { ok: false, erreur: 'e-mail invalide' };
   feuille_(ONGLET_INSCRIPTIONS).appendRow([
     new Date(), texte_(prenom), texte_(nom), texte_(telephone), texte_(email),
     d.atelier === 'Non' ? 'Non' : 'Oui', texte_(propre_(d.mot, LONGUEUR_MAX_MOT)), texte_(propre_(d.source, 20))
