@@ -15,6 +15,7 @@ var ONGLET_INSCRIPTIONS = 'Inscriptions';
 var ONGLET_BLOQUES = 'Mots bloqués';
 var DUREE_CACHE = 8;          // secondes pendant lesquelles la liste des mots est gardée en mémoire
 var LONGUEUR_MAX_MOT = 30;
+var FERME = true;             // true : le stand est fermé, plus rien n'est enregistré ; le nuage reste lisible (false pour rouvrir, puis redéployer)
 
 /* ------------------------------------------------------------------ */
 /* Menu et installation                                                */
@@ -91,6 +92,7 @@ function doGet() {
 
 /** Écriture : un mot ou une inscription. */
 function doPost(e) {
+  if (FERME) return repondre_({ ok: false, erreur: 'fermé' });
   var d;
   try { d = JSON.parse(e.postData.contents); } catch (err) { return repondre_({ ok: false, erreur: 'format' }); }
   if (!d || typeof d !== 'object') return repondre_({ ok: false, erreur: 'format' });

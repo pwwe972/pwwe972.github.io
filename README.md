@@ -1,5 +1,9 @@
 # Stand PWWE — nuage de mots, inscription atelier, Instagram
 
+> **Stand fermé depuis le 22 novembre 2026.** `index.html` est une page de clôture, `ecran.html` et `affiche.html` sont retirés,
+> et le script Google n'enregistre plus rien (`FERME = true` dans `apps-script/Code.gs`). La version du jour de l'événement
+> est conservée sous l'étiquette git `stand-2026-11-21` : la suite de ce document décrit cette version.
+
 Un seul QR code, une seule page. Le visiteur tape son mot, choisit un des deux boutons,
 et le mot apparaît sur l'écran du stand en quelques secondes.
 
