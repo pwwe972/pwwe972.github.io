@@ -1,11 +1,13 @@
 /**
- * Stand PWWE — collecte des mots du nuage et des inscriptions aux ateliers.
+ * Stand : collecte des mots du nuage et des inscriptions à la liste de contacts.
  *
  * Ce script est attaché à un Google Sheet (Extensions > Apps Script).
  * Il est publié comme « application web » :
  *   - POST : enregistre un mot (onglet « Mots ») ou une inscription (onglet « Inscriptions ») ;
- *   - GET  : renvoie la liste des mots, et rien d'autre. Les coordonnées ne sortent jamais du Sheet.
+ *   - GET  : renvoie la liste des mots et l'état du stand (ouvert ou fermé), rien d'autre.
+ *            Les coordonnées ne sortent jamais du Sheet.
  *
+ * Tout se pilote depuis le menu « Stand » du Sheet : ouvrir, fermer, vider, faire le bilan.
  * Modération : supprimer une ligne de l'onglet « Mots » retire le mot de l'écran en quelques secondes.
  * Les mots listés dans l'onglet « Mots bloqués » ne sont jamais enregistrés.
  */
@@ -15,16 +17,22 @@ var ONGLET_INSCRIPTIONS = 'Inscriptions';
 var ONGLET_BLOQUES = 'Mots bloqués';
 var DUREE_CACHE = 8;          // secondes pendant lesquelles la liste des mots est gardée en mémoire
 var LONGUEUR_MAX_MOT = 30;
-var FERME = true;             // true : le stand est fermé, plus rien n'est enregistré ; le nuage reste lisible (false pour rouvrir, puis redéployer)
+var ONGLET_BILAN = 'Bilan des mots';
 
 /* ------------------------------------------------------------------ */
 /* Menu et installation                                                */
 /* ------------------------------------------------------------------ */
 
 function onOpen() {
-  var menu = SpreadsheetApp.getUi().createMenu('PWWE')
-    .addItem('Préparer les onglets', 'installer')
-    .addItem('Vider le nuage de mots…', 'viderLeNuage');
+  var menu = SpreadsheetApp.getUi().createMenu('Stand')
+    .addItem('Ouvrir le stand', 'ouvrirLeStand')
+    .addItem('Fermer le stand', 'fermerLeStand')
+    .addSeparator()
+    .addItem('Bilan des mots', 'bilanDesMots')
+    .addItem('Vider le nuage de mots…', 'viderLeNuage')
+    .addItem('Vider les inscriptions…', 'viderLesInscriptions')
+    .addSeparator()
+    .addItem('Préparer les onglets', 'installer');
   // Liste complémentaire de mots bloqués : présente seulement si le fichier MotsBloques.gs accompagne ce script.
   var complement = typeof completerMotsBloques === 'function';
   if (complement) menu.addItem('Compléter les mots bloqués', 'completerMotsBloques');
@@ -37,7 +45,7 @@ function installer() {
   var classeur = SpreadsheetApp.getActiveSpreadsheet();
   preparerOnglet_(classeur, ONGLET_MOTS, ['Date', 'Mot', 'Source']);
   preparerOnglet_(classeur, ONGLET_INSCRIPTIONS,
-    ['Date', 'Prénom', 'Nom', 'Téléphone', 'E-mail', 'Inscription au prochain atelier', 'Mot déposé', 'Source']);
+    ['Date', 'Prénom', 'Nom', 'Téléphone', 'E-mail', 'Case cochée', 'Mot déposé', 'Source']);
   var bloques = preparerOnglet_(classeur, ONGLET_BLOQUES, ['Mot à bloquer (un par ligne)']);
   if (bloques.getLastRow() < 2) {
     var exemples = ['merde', 'putain', 'pute', 'con', 'connard', 'connasse', 'salope', 'salaud', 'encule',
@@ -75,16 +83,79 @@ function viderLeNuage() {
   CacheService.getScriptCache().remove('mots');
 }
 
+/** Menu : efface toutes les inscriptions (à faire une fois la liste récupérée, avant un nouvel événement). */
+function viderLesInscriptions() {
+  var ui = SpreadsheetApp.getUi();
+  var feuille = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ONGLET_INSCRIPTIONS);
+  if (!feuille || feuille.getLastRow() < 2) { ui.alert('Il n’y a aucune inscription.'); return; }
+  var n = feuille.getLastRow() - 1;
+  var reponse = ui.alert('Vider les inscriptions',
+    'Supprimer définitivement les ' + n + ' inscription(s) ? Récupérez d’abord la liste si vous en avez besoin.', ui.ButtonSet.OK_CANCEL);
+  if (reponse !== ui.Button.OK) return;
+  feuille.deleteRows(2, n);
+}
+
+/** Menu : ouvre ou ferme le stand. Fermé, plus aucun mot ni inscription n'est accepté ; le nuage reste lisible. */
+function ouvrirLeStand() { changerEtat_(false); }
+function fermerLeStand() { changerEtat_(true); }
+function changerEtat_(ferme) {
+  PropertiesService.getDocumentProperties().setProperty('ferme', ferme ? '1' : '0');
+  CacheService.getScriptCache().removeAll(['ferme', 'mots']);
+  SpreadsheetApp.getUi().alert(ferme
+    ? 'Le stand est fermé : plus aucun mot ni inscription n’est accepté. Les visiteurs voient le message de clôture.'
+    : 'Le stand est ouvert : les mots et les inscriptions sont acceptés.');
+}
+
+function estFerme_() {
+  var cache = CacheService.getScriptCache(), v = cache.get('ferme');
+  if (v !== '0' && v !== '1') {
+    v = PropertiesService.getDocumentProperties().getProperty('ferme') === '1' ? '1' : '0';
+    try { cache.put('ferme', v, 60); } catch (e) {}
+  }
+  return v === '1';
+}
+
+/** Menu : écrit dans l'onglet « Bilan des mots » chaque mot distinct et son nombre de citations, du plus cité au moins cité. */
+function bilanDesMots() {
+  var classeur = SpreadsheetApp.getActiveSpreadsheet();
+  var lignes = compterMots_(lireMots_());
+  var feuille = classeur.getSheetByName(ONGLET_BILAN) || classeur.insertSheet(ONGLET_BILAN);
+  feuille.clearContents();
+  feuille.getRange('A:A').setNumberFormat('@');
+  feuille.getRange(1, 1, 1, 2).setValues([['Mot', 'Nombre de citations']]).setFontWeight('bold');
+  feuille.setFrozenRows(1);
+  if (lignes.length) feuille.getRange(2, 1, lignes.length, 2).setValues(lignes);
+  classeur.setActiveSheet(feuille);
+}
+
+/** Regroupe les mots sans tenir compte des accents ni des majuscules. Renvoie [[mot, nombre], …], du plus cité au moins cité. */
+function compterMots_(mots) {
+  var groupes = {}, ordre = [];
+  mots.forEach(function (mot) {
+    var k = cle_(mot); if (!k) return;
+    var g = groupes[k]; if (!g) { g = groupes[k] = { n: 0, formes: {} }; ordre.push(g); }
+    var forme = mot.toLowerCase();
+    g.n++; g.formes[forme] = (g.formes[forme] || 0) + 1;
+  });
+  return ordre.map(function (g) {
+    // forme la plus fréquente ; à égalité, celle qui porte des accents
+    var forme = Object.keys(g.formes).sort(function (a, b) {
+      return g.formes[b] - g.formes[a] || (b !== cle_(b)) - (a !== cle_(a));
+    })[0];
+    return [forme, g.n];
+  }).sort(function (a, b) { return b[1] - a[1]; });
+}
+
 /* ------------------------------------------------------------------ */
 /* Application web                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Lecture : la liste des mots, dans l'ordre d'arrivée. */
+/** Lecture : l'état du stand et la liste des mots, dans l'ordre d'arrivée. */
 function doGet() {
   var cache = CacheService.getScriptCache();
   var json = cache.get('mots');
   if (!json) {
-    json = JSON.stringify({ ok: true, mots: lireMots_() });
+    json = JSON.stringify({ ok: true, ouvert: !estFerme_(), mots: lireMots_() });
     try { cache.put('mots', json, DUREE_CACHE); } catch (e) { /* liste trop longue pour le cache : on s'en passe */ }
   }
   return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
@@ -92,7 +163,7 @@ function doGet() {
 
 /** Écriture : un mot ou une inscription. */
 function doPost(e) {
-  if (FERME) return repondre_({ ok: false, erreur: 'fermé' });
+  if (estFerme_()) return repondre_({ ok: false, erreur: 'fermé' });
   var d;
   try { d = JSON.parse(e.postData.contents); } catch (err) { return repondre_({ ok: false, erreur: 'format' }); }
   if (!d || typeof d !== 'object') return repondre_({ ok: false, erreur: 'format' });
@@ -141,7 +212,7 @@ function enregistrerInscription_(d) {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return { ok: false, erreur: 'e-mail invalide' };
   feuille_(ONGLET_INSCRIPTIONS).appendRow([
     new Date(), texte_(prenom), texte_(nom), texte_(telephone), texte_(email),
-    d.atelier === 'Non' ? 'Non' : 'Oui', texte_(propre_(d.mot, LONGUEUR_MAX_MOT)), texte_(propre_(d.source, 20))
+    d.coche === 'Oui' ? 'Oui' : (d.coche === 'Non' ? 'Non' : ''), texte_(propre_(d.mot, LONGUEUR_MAX_MOT)), texte_(propre_(d.source, 20))
   ]);
   return { ok: true };
 }

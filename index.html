@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PWWE – Merci de votre visite</title>
+<title>Votre mot sur le nuage</title>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="assets/icone.png">
@@ -12,36 +12,679 @@
 <style>
   body { min-height: 100vh; min-height: 100dvh; }
   main {
-    max-width: 30rem; margin: 0 auto;
+    max-width: 30rem;
+    margin: 0 auto;
     padding: calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem calc(2rem + env(safe-area-inset-bottom, 0px));
   }
+  .demo {
+    margin: 0; padding: .4rem 1.25rem;
+    background: var(--melasse); color: #fff;
+    font-size: .875rem; text-align: center;
+  }
   .tete img { display: block; width: 5.5rem; height: auto; margin-left: -.35rem; }
-  h1 {
+
+  h1, h2 {
     font-family: var(--titre); font-weight: 900; color: var(--canne);
-    font-size: clamp(2.2rem, 10vw, 3rem); line-height: 1.04; letter-spacing: .005em; margin: 1.1rem 0 0; text-wrap: balance;
+    line-height: 1.04; letter-spacing: .005em; margin: 1.1rem 0 0;
+    text-wrap: balance;
   }
-  p { font-size: 1.125rem; line-height: 1.45; margin: 1rem 0 0; }
-  .insta {
-    display: block; margin-top: 1.75rem; padding: 1rem 1.25rem; border-radius: 8px;
-    background: var(--ciel-profond); color: #fff; text-decoration: none; text-align: center;
-    font-family: var(--titre); font-weight: 900; font-size: 1.5rem; line-height: 1.1;
+  h1 { font-size: clamp(2.1rem, 9.4vw, 2.85rem); }
+  h2 { font-size: clamp(1.9rem, 8.4vw, 2.5rem); }
+  .chapo { margin: .6rem 0 0; font-size: 1.125rem; }
+  .chapo strong { font-weight: 600; }
+
+  /* Champ du mot : un cartouche, comme l'étiquette de la bouteille du logo */
+  .cartouche {
+    display: block; width: 100%;
+    margin-top: 1.35rem; padding: .7rem .9rem .6rem;
+    border: 3px solid var(--canne); border-radius: 6px;
+    background: var(--papier); color: var(--ciel-profond);
+    font-family: var(--titre); font-weight: 900; font-size: 2rem; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .02em;
+    box-shadow: inset 0 0 0 4px var(--papier), inset 0 0 0 5px var(--canne);
+    -webkit-appearance: none; appearance: none;
   }
-  .insta:focus-visible { outline: 3px solid var(--canne); outline-offset: 3px; }
+  .cartouche::placeholder { color: #b9a48f; opacity: 1; }
+  .cartouche:focus { outline: none; border-color: var(--ciel-profond);
+    box-shadow: inset 0 0 0 4px var(--papier), inset 0 0 0 5px var(--ciel-profond); }
+
+  .aide { margin: .55rem 0 0; font-size: .95rem; color: #5b4633; }
+  .erreur { margin: .6rem 0 0; font-weight: 600; color: var(--alerte); }
+  .lien {
+    background: none; border: 0; padding: 0; font: inherit; font-weight: 600;
+    color: var(--ciel-profond); text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+  }
+
+  .boutons { display: grid; gap: .75rem; margin-top: 1.25rem; }
+  .bouton {
+    display: block; width: 100%; min-height: 4.25rem;
+    padding: .7rem 1rem .75rem; border: 3px solid var(--canne); border-radius: 6px;
+    font-family: var(--texte); text-align: left; text-decoration: none; cursor: pointer;
+    background: var(--canne); color: #fff;
+    transition: transform .08s ease;
+  }
+  .bouton:active { transform: translateY(2px); }
+  .bouton .avant { display: block; font-size: .95rem; font-weight: 500; opacity: .92; }
+  .bouton .action { display: block; font-family: var(--titre); font-weight: 900; font-size: 1.55rem; line-height: 1.08; letter-spacing: .01em; }
+  .bouton.ciel { background: var(--ciel); border-color: var(--ciel); color: var(--melasse); }
+  .bouton.simple { min-height: 3.5rem; }
+  .bouton[disabled] { opacity: .55; cursor: progress; }
+
+  /* Formulaire d'inscription */
+  .champ { margin-top: .95rem; }
+  .champ label, legend { display: block; padding: 0; font-weight: 600; font-size: 1rem; margin-bottom: .3rem; }
+  .champ input {
+    display: block; width: 100%; padding: .7rem .8rem;
+    border: 2px solid var(--canne); border-radius: 6px; background: #fff; color: var(--melasse);
+    font: 500 1.125rem/1.3 var(--texte);
+    -webkit-appearance: none; appearance: none;
+  }
+  .tel { display: grid; grid-template-columns: 6.9rem minmax(0, 1fr); gap: .5rem; }
+  .tel select {
+    display: block; width: 100%; padding: .7rem 1.5rem .7rem .6rem; overflow: hidden; white-space: nowrap;
+    border: 2px solid var(--canne); border-radius: 6px; color: var(--melasse); font: 500 1.125rem/1.3 var(--texte);
+    -webkit-appearance: none; appearance: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2364360d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right .55rem center/.7rem no-repeat;
+  }
+  .tel select:focus { outline: none; border-color: var(--ciel-profond); box-shadow: 0 0 0 3px var(--brume); }
+  .champ .erreur { margin-top: .35rem; font-size: .95rem; }
+  .champ input[aria-invalid="true"] { border-color: var(--alerte); }
+  .champ input::placeholder { color: #b9a48f; opacity: 1; }
+  .champ input:focus { outline: none; border-color: var(--ciel-profond); box-shadow: 0 0 0 3px var(--brume); }
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  fieldset { border: 0; padding: 0; margin: 1.1rem 0 0; min-width: 0; }
+  .choix { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .choix label {
+    display: flex; align-items: center; justify-content: center; min-height: 3.1rem; margin: 0;
+    border: 2px solid var(--canne); border-radius: 6px; font-weight: 600; font-size: 1.125rem; cursor: pointer;
+  }
+  .choix.seul { grid-template-columns: 1fr; }
+  .choix.seul label { justify-content: flex-start; padding: .5rem .9rem; font-size: 1.05rem; }
+  .choix.seul label::before { content: ""; flex: none; width: 1.15em; height: 1.15em; margin-right: .6em; border: 2px solid var(--canne); border-radius: 4px; background: #fff; }
+  .choix.seul input:checked + label::before { background: var(--ciel-profond) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/85% no-repeat; border-color: var(--ciel-profond); }
+  .facultatif { font-weight: 400; color: #5b4633; }
+  .choix input { position: absolute; opacity: 0; pointer-events: none; }
+  .choix input:checked + label { background: var(--brume); border-color: var(--ciel-profond); box-shadow: inset 0 0 0 1px var(--ciel-profond); }
+  .choix input:focus-visible + label { outline: 3px solid var(--ciel-profond); outline-offset: 3px; }
+  .mention { margin: 1rem 0 0; font-size: .875rem; color: #5b4633; }
+  .insta { font-family: var(--titre); font-weight: 900; font-size: 1.9rem; color: var(--ciel-profond); margin: .4rem 0 0; }
+  .retour { margin-top: 1.25rem; }
+  .jauge { height: 4px; margin-top: 1.5rem; background: var(--brume); border-radius: 2px; overflow: hidden; }
+  .jauge i { display: block; height: 100%; width: 100%; background: var(--ciel); transform-origin: left; }
+  h2[tabindex="-1"]:focus { outline: none; }
+  .invisible { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
   .slogan { margin-top: 2.5rem; font-family: var(--titre); font-weight: 400; font-size: 1.25rem; color: var(--canne); }
+
+  .vue { animation: entree .28s ease both; }
+  @keyframes entree { from { opacity: 0; transform: translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { .vue { animation: none; } .bouton { transition: none; } }
 </style>
 </head>
 <body>
+<p class="demo" id="demo" hidden>Mode démo : rien n’est enregistré tant que l’adresse API manque dans config.js.</p>
 <main>
-  <header class="tete"><img src="assets/logo-pwwe.png" alt="Pa Wol Wonm Expérience" width="485" height="520"></header>
-  <h1>Merci de votre visite</h1>
-  <p>Le stand PWWE de la Fête de la Canne 2026 est terminé : le nuage de mots et la liste des ateliers sont fermés.</p>
-  <p>Les dates de nos prochains ateliers sont annoncées sur Instagram.</p>
-  <a class="insta" id="insta" href="https://www.instagram.com/pwwe972" rel="noopener">Suivre PWWE sur Instagram</a>
-  <p class="slogan">L’excellence à la portée de vos sens</p>
+  <header class="tete">
+    <img id="logo" src="assets/logo-pwwe.png" alt="" width="485" height="520">
+  </header>
+
+  <!-- 1. Le mot -->
+  <section class="vue" id="vue-mot">
+    <h1 id="question"></h1>
+    <form id="form-mot" novalidate>
+      <label class="invisible" for="mot">Votre mot</label>
+      <input class="cartouche" id="mot" name="mot" type="text" maxlength="30"
+             placeholder="Votre mot" autocomplete="off" autocapitalize="none" enterkeyhint="done" aria-describedby="aide-mot">
+      <p class="aide" id="aide-mot"></p>
+      <p class="erreur" id="erreur-espace" role="alert" hidden>Deux mots au maximum, s’il vous plaît.</p>
+      <p class="erreur" id="erreur-mot" role="alert" hidden>
+        Tapez d’abord votre mot. <button type="button" class="lien" id="sans-mot">Continuer sans mot</button>
+      </p>
+      <div class="boutons">
+        <button type="button" class="bouton" id="btn-atelier">
+          <span class="avant">Envoyer mon mot, puis</span>
+          <span class="action" data-liste-bouton></span>
+        </button>
+        <button type="button" class="bouton ciel" id="btn-insta">
+          <span class="avant">Envoyer mon mot, puis</span>
+          <span class="action" data-suivre></span>
+        </button>
+        <button type="submit" class="bouton simple" id="btn-kiosque" hidden>
+          <span class="action">Envoyer mon mot</span>
+        </button>
+      </div>
+      <p class="retour" id="sortie"><button type="button" class="lien" id="btn-seul">Envoyer mon mot, sans suite</button></p>
+    </form>
+  </section>
+
+  <!-- 2. Coordonnées pour la liste de contacts -->
+  <section class="vue" id="vue-atelier" hidden>
+    <h2 id="titre-atelier" tabindex="-1"></h2>
+    <p class="chapo" id="merci-mot"></p>
+    <p class="aide" id="liste-texte"></p>
+    <form id="form-atelier" novalidate>
+      <div class="duo">
+        <div class="champ">
+          <label for="prenom">Prénom</label>
+          <input id="prenom" name="prenom" type="text" autocomplete="given-name" autocapitalize="words" maxlength="60" required>
+          <p class="erreur" id="err-prenom" role="alert" hidden></p>
+        </div>
+        <div class="champ">
+          <label for="nom">Nom</label>
+          <input id="nom" name="nom" type="text" autocomplete="family-name" autocapitalize="words" maxlength="60" required>
+          <p class="erreur" id="err-nom" role="alert" hidden></p>
+        </div>
+      </div>
+      <div class="champ">
+        <label for="telephone">Téléphone</label>
+        <div class="tel">
+          <label class="invisible" for="pays">Indicatif du pays</label>
+          <select id="pays" name="pays">
+            <option value="596" selected data-exemple="0696 12 34 56" title="Martinique">🇲🇶 +596</option>
+            <option value="590" data-exemple="0690 12 34 56" title="Guadeloupe">🇬🇵 +590</option>
+            <option value="594" data-exemple="0694 12 34 56" title="Guyane">🇬🇫 +594</option>
+            <option value="33" data-exemple="06 12 34 56 78" title="France">🇫🇷 +33</option>
+            <option value="262" data-exemple="0692 12 34 56" title="Réunion">🇷🇪 +262</option>
+            <option value="1758" data-exemple="284 5678" title="Sainte-Lucie">🇱🇨 +1758</option>
+            <option value="1767" data-exemple="225 1234" title="Dominique">🇩🇲 +1767</option>
+            <option value="1" data-exemple="212 555 0123" title="États-Unis, Canada">🇺🇸 +1</option>
+            <option value="44" data-exemple="07400 123456" title="Royaume-Uni">🇬🇧 +44</option>
+            <option value="32" data-exemple="0470 12 34 56" title="Belgique">🇧🇪 +32</option>
+            <option value="41" data-exemple="078 123 45 67" title="Suisse">🇨🇭 +41</option>
+            <option value="49" data-exemple="0151 23456789" title="Allemagne">🇩🇪 +49</option>
+            <option value="34" data-exemple="612 34 56 78" title="Espagne">🇪🇸 +34</option>
+            <option value="39" data-exemple="312 345 6789" title="Italie">🇮🇹 +39</option>
+            <option value="" data-exemple="+55 11 91234 5678" title="Autre indicatif">🌍 Autre</option>
+          </select>
+          <input id="telephone" name="telephone" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" placeholder="0696 12 34 56">
+        </div>
+        <p class="erreur" id="err-telephone" role="alert" hidden></p>
+      </div>
+      <div class="champ">
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="none" maxlength="120">
+        <p class="erreur" id="err-email" role="alert" hidden></p>
+      </div>
+      <p class="aide">Téléphone ou e-mail : un seul suffit.</p>
+      <p class="erreur" id="err-contact" role="alert" hidden></p>
+      <fieldset id="bloc-case" hidden>
+        <legend><span id="case-question"></span> <span class="facultatif">(facultatif)</span></legend>
+        <div class="choix seul">
+          <input type="checkbox" name="coche" id="case-oui" value="Oui"><label for="case-oui" id="case-libelle"></label>
+        </div>
+        <p class="aide" id="case-aide"></p>
+      </fieldset>
+      <p class="erreur" id="erreur-atelier" role="alert" hidden></p>
+      <div class="boutons">
+        <button type="submit" class="bouton simple" id="btn-envoyer">
+          <span class="action" id="liste-envoyer"></span>
+        </button>
+      </div>
+      <p class="mention" id="liste-mention"></p>
+    </form>
+  </section>
+
+  <!-- 3. Fin du parcours « liste » : proposition Instagram -->
+  <section class="vue" id="vue-fin" hidden>
+    <h2 id="titre-fin" tabindex="-1"></h2>
+    <p class="chapo" id="liste-confirmation"></p>
+    <div id="fin-telephone">
+      <div class="boutons" data-insta>
+        <a class="bouton ciel" id="lien-insta" href="#" rel="noopener">
+          <span class="avant">En attendant,</span>
+          <span class="action" data-suivre></span>
+        </a>
+      </div>
+      <p class="retour"><button type="button" class="lien" data-recommencer>Terminer</button></p>
+    </div>
+    <div id="fin-kiosque" hidden>
+      <p class="chapo" data-insta>En attendant, suivez-nous sur Instagram :</p>
+      <p class="insta" data-insta data-compte></p>
+      <div class="jauge" aria-hidden="true"><i></i></div>
+    </div>
+  </section>
+
+  <!-- 4. Merci (retour d'Instagram, ou tablette du stand) -->
+  <section class="vue" id="vue-merci" hidden>
+    <h2 id="titre-merci" tabindex="-1">Merci !</h2>
+    <p class="chapo" id="texte-merci"></p>
+    <div id="merci-telephone">
+      <div class="boutons" data-liste>
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action" data-liste-bouton></span></button>
+      </div>
+      <p class="retour"><button type="button" class="lien" data-recommencer>Ajouter un mot</button></p>
+    </div>
+    <div id="merci-kiosque" hidden>
+      <div class="boutons" data-liste>
+        <button type="button" class="bouton simple" data-vers-atelier><span class="action" data-liste-bouton></span></button>
+      </div>
+      <p class="aide" data-insta>Pour Instagram, scannez le QR code du stand avec votre téléphone.</p>
+      <div class="jauge" aria-hidden="true"><i></i></div>
+    </div>
+  </section>
+
+  <!-- 5. Stand fermé -->
+  <section class="vue" id="vue-cloture" hidden>
+    <h2 id="titre-cloture" tabindex="-1"></h2>
+    <div id="texte-cloture"></div>
+    <div class="boutons" data-insta>
+      <a class="bouton ciel" id="lien-insta-cloture" href="#" rel="noopener"><span class="action" data-suivre></span></a>
+    </div>
+    <p class="slogan" id="slogan"></p>
+  </section>
 </main>
+
 <script src="config.js"></script>
 <script>
-  (function () { var C = window.PWWE || {}; if (C.INSTAGRAM) document.getElementById("insta").href = C.INSTAGRAM; })();
+(function () {
+  "use strict";
+  var C = window.STAND || {};
+  var API = String(C.API || "").trim();
+  var DEMO = !/^https:\/\/script\.google(usercontent)?\.com\//.test(API);
+  var ORG = C.ORGANISATION || "";
+  var INSTAGRAM = String(C.INSTAGRAM || "").trim();
+  var COMPTE = C.COMPTE_INSTAGRAM || "";
+  var LISTE = C.LISTE || null;                 // liste de contacts proposée après le mot (facultative)
+  var CASE = (LISTE && LISTE.CASE) || null;    // case à cocher facultative du formulaire
+  var CLOTURE = C.CLOTURE || {};
+  var KIOSQUE = new URLSearchParams(location.search).has("kiosque");
+  var SANS_SUITE = !LISTE && !INSTAGRAM;       // ni liste ni Instagram : un seul bouton « Envoyer mon mot »
+  var SOURCE = KIOSQUE ? "tablette" : "téléphone";
+  var CLE_FILE = "stand-file", CLE_RETOUR = "stand-retour", CLE_DEMO = "stand-demo-mots";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var vues = ["vue-mot", "vue-atelier", "vue-fin", "vue-merci", "vue-cloture"];
+  var dernierMot = "";
+  var minuteur = null;
+  var clos = false;                            // vrai quand le stand est fermé : seule la vue de clôture s'affiche
+
+  /* ---------- Textes venus de config.js ---------- */
+  function texte(id, valeur) { $(id).textContent = valeur || ""; }
+  function partout(selecteur, action) { document.querySelectorAll(selecteur).forEach(action); }
+  document.title = "Votre mot sur le nuage" + (ORG ? " " + ORG : "");
+  $("logo").alt = C.NOM_COMPLET || ORG;
+  if (C.LOGO && C.LOGO !== $("logo").getAttribute("src")) {
+    $("logo").removeAttribute("width"); $("logo").removeAttribute("height"); $("logo").src = C.LOGO;
+  }
+  texte("question", C.QUESTION || "Votre mot ?");
+  texte("aide-mot", C.AIDE_MOT || "Un mot, deux au plus.");
+  partout("[data-suivre]", function (e) { e.textContent = "Suivre " + (ORG || "le stand") + " sur Instagram"; });
+  partout("[data-compte]", function (e) { e.textContent = COMPTE; });
+  partout("[data-insta]", function (e) { if (!INSTAGRAM) e.hidden = true; });
+  partout("[data-liste]", function (e) { if (!LISTE) e.hidden = true; });
+  if (INSTAGRAM) { $("lien-insta").href = INSTAGRAM; $("lien-insta-cloture").href = INSTAGRAM; }
+  if (LISTE) {
+    partout("[data-liste-bouton]", function (e) { e.textContent = LISTE.BOUTON || "Laisser mes coordonnées"; });
+    texte("titre-atelier", LISTE.TITRE || LISTE.BOUTON);
+    texte("liste-texte", LISTE.TEXTE); $("liste-texte").hidden = !LISTE.TEXTE;
+    texte("liste-envoyer", LISTE.ENVOYER || "Envoyer");
+    texte("liste-confirmation", LISTE.CONFIRMATION || "Vos coordonnées sont bien enregistrées.");
+    texte("liste-mention", LISTE.MENTION); $("liste-mention").hidden = !LISTE.MENTION;
+    if (CASE) {
+      $("bloc-case").hidden = false;
+      texte("case-question", CASE.QUESTION); texte("case-libelle", CASE.LIBELLE);
+      texte("case-aide", CASE.AIDE); $("case-aide").hidden = !CASE.AIDE;
+    }
+  }
+  texte("titre-cloture", CLOTURE.TITRE || "Merci de votre visite");
+  (CLOTURE.TEXTE || ["Ce stand est terminé."]).forEach(function (paragraphe) {
+    var p = document.createElement("p"); p.className = "chapo"; p.textContent = paragraphe; $("texte-cloture").appendChild(p);
+  });
+  texte("slogan", C.SLOGAN); $("slogan").hidden = !C.SLOGAN;
+
+  if (DEMO) $("demo").hidden = false;
+  $("btn-atelier").hidden = !LISTE; $("btn-insta").hidden = !INSTAGRAM;
+  if (SANS_SUITE) { $("sortie").hidden = true; $("btn-kiosque").hidden = false; }
+  if (KIOSQUE) {
+    $("btn-atelier").hidden = true; $("btn-insta").hidden = true; $("sortie").hidden = true; $("btn-kiosque").hidden = false;
+    $("fin-telephone").hidden = true; $("fin-kiosque").hidden = false;
+    $("merci-telephone").hidden = true; $("merci-kiosque").hidden = false;
+  }
+
+  /* ---------- Outils ---------- */
+  function identifiant() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+  }
+  function nettoyer(texte, max) {
+    return String(texte || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
+  }
+  function lire(cle) { try { return JSON.parse(localStorage.getItem(cle)) || []; } catch (e) { return []; } }
+  function ecrire(cle, v) { try { localStorage.setItem(cle, JSON.stringify(v)); } catch (e) {} }
+
+  /* ---------- Envois ---------- */
+  function poster(charge, options) {
+    options = options || {};
+    if (DEMO) {
+      if (charge.type === "mot") { var d = lire(CLE_DEMO); d.push(charge.mot); ecrire(CLE_DEMO, d); }
+      return new Promise(function (ok) { setTimeout(function () { ok({ ok: true, demo: true }); }, 350); });
+    }
+    var ctrl = new AbortController();
+    var delai = setTimeout(function () { ctrl.abort(); }, options.delai || 20000);
+    return fetch(API, {
+      method: "POST",
+      // text/plain : requête « simple », donc sans pré-vérification CORS (Apps Script n'y répond pas)
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(charge),
+      keepalive: !!options.keepalive,
+      credentials: "omit",
+      redirect: "follow",
+      signal: ctrl.signal
+    }).then(function (r) { return r.json(); })
+      .then(function (r) { if (r && r.erreur === "fermé") fermer(); return r; })
+      .finally(function () { clearTimeout(delai); });
+  }
+
+  // Les mots passent par une file conservée sur l'appareil : si le réseau flanche
+  // ou si la page se ferme (départ vers Instagram), ils repartent à la prochaine occasion.
+  // Le serveur ignore les doublons grâce à l'identifiant.
+  function retirerDeFile(id) { ecrire(CLE_FILE, lire(CLE_FILE).filter(function (c) { return c.id !== id; })); }
+  function envoyerMot(mot, options) {
+    var charge = { type: "mot", id: identifiant(), mot: mot, source: SOURCE, t: Date.now() };
+    var file = lire(CLE_FILE); file.push(charge); ecrire(CLE_FILE, file);
+    return poster(charge, options).then(function () { retirerDeFile(charge.id); }).catch(function () {});
+  }
+  var vidage = false;
+  function viderFile() {
+    if (vidage) return;
+    var file = lire(CLE_FILE).filter(function (c) { return Date.now() - c.t < 12 * 3600 * 1000; });
+    ecrire(CLE_FILE, file);
+    if (!file.length) return;
+    vidage = true;
+    file.reduce(function (suite, charge) {
+      return suite.then(function () { return poster(charge).then(function () { retirerDeFile(charge.id); }); });
+    }, Promise.resolve()).catch(function () {}).finally(function () { vidage = false; });
+  }
+  window.addEventListener("online", viderFile);
+
+  /* ---------- Navigation entre les vues ---------- */
+  function montrer(id, titre) {
+    if (clos && id !== "vue-cloture") return;
+    clearTimeout(minuteur);
+    vues.forEach(function (v) { $(v).hidden = v !== id; });
+    window.scrollTo(0, 0);
+    if (titre) $(titre).focus({ preventScroll: true });
+  }
+  // Stand fermé : plus de saisie possible, les mots en attente sont abandonnés.
+  function fermer() {
+    if (clos) return;
+    clos = true; ecrire(CLE_FILE, []);
+    try { sessionStorage.removeItem(CLE_RETOUR); } catch (e) {}
+    montrer("vue-cloture");
+  }
+  function recommencer() {
+    $("form-mot").reset(); $("form-atelier").reset();
+    $("erreur-mot").hidden = true; $("erreur-espace").hidden = true; effacerErreurs();
+    dernierMot = ""; paysChoisi = false; emailAccepte = ""; montrerExemple();
+    try { sessionStorage.removeItem(CLE_RETOUR); } catch (e) {}
+    montrer("vue-mot");
+    if (KIOSQUE) $("mot").focus();
+  }
+  function retourAuto(secondes, vue) {
+    var barre = $(vue).querySelector(".jauge i");
+    if (barre) {
+      barre.style.transition = "none"; barre.style.transform = "scaleX(1)";
+      void barre.offsetWidth;
+      barre.style.transition = "transform " + secondes + "s linear"; barre.style.transform = "scaleX(0)";
+    }
+    minuteur = setTimeout(recommencer, secondes * 1000);
+  }
+  function versMerci(mot) {
+    $("texte-merci").textContent = mot
+      ? "« " + mot + " » rejoint le nuage : regardez l’écran du stand."
+      : "Merci de votre visite. Vous pouvez encore ajouter votre mot au nuage.";
+    montrer("vue-merci", "titre-merci");
+    if (KIOSQUE) retourAuto(15, "vue-merci");
+  }
+  function versAtelier() {
+    $("merci-mot").textContent = dernierMot
+      ? "Merci ! « " + dernierMot + " » rejoint le nuage sur l’écran du stand. Laissez-nous de quoi vous joindre :"
+      : "Laissez-nous de quoi vous joindre :";
+    montrer("vue-atelier", "titre-atelier");
+    if (KIOSQUE) surveillerInactivite();
+  }
+  // Sur la tablette du stand, un formulaire abandonné s'efface tout seul.
+  function surveillerInactivite() {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(recommencer, 90000);
+  }
+  if (KIOSQUE) $("form-atelier").addEventListener("input", surveillerInactivite);
+
+  /* ---------- Étape 1 : le mot ---------- */
+  function motSaisi() { return nettoyer($("mot").value, 30); }
+  // Un mot, deux au plus : une saisie avec plus d'un espace est refusée (le script Google la refuse aussi).
+  function unSeulMot(mot) {
+    if (mot.split(" ").length <= 2) return true;
+    $("erreur-mot").hidden = true; $("erreur-espace").hidden = false; $("mot").focus();
+    return false;
+  }
+  function exigerMot() {
+    var mot = motSaisi();
+    if (!mot) { $("erreur-espace").hidden = true; $("erreur-mot").hidden = false; $("mot").focus(); return ""; }
+    return unSeulMot(mot) ? mot : "";
+  }
+  $("mot").addEventListener("input", function () { $("erreur-mot").hidden = true; $("erreur-espace").hidden = true; });
+  $("mot").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !KIOSQUE) { e.preventDefault(); if (motSaisi()) $("mot").blur(); }
+  });
+
+  var suite = null; // « atelier » (la liste de contacts) ou « insta », pour le lien « Continuer sans mot »
+  $("btn-atelier").addEventListener("click", function () {
+    suite = "atelier";
+    var mot = exigerMot(); if (!mot) return;
+    dernierMot = mot; envoyerMot(mot); versAtelier();
+  });
+  $("btn-insta").addEventListener("click", function () {
+    suite = "insta";
+    var mot = exigerMot(); if (!mot) return;
+    dernierMot = mot;
+    // L'envoi continue même si la page se ferme (keepalive), et le départ vers Instagram
+    // reste dans le geste du visiteur : c'est ce qui permet au téléphone d'ouvrir l'application.
+    envoyerMot(mot, { keepalive: true });
+    partirSurInstagram(mot);
+  });
+  $("btn-seul").addEventListener("click", function () {
+    var mot = motSaisi();
+    if (!mot) { $("mot").focus(); return; }
+    if (!unSeulMot(mot)) return;
+    dernierMot = mot; envoyerMot(mot); versMerci(mot);
+  });
+  $("sans-mot").addEventListener("click", function () {
+    $("erreur-mot").hidden = true;
+    if (suite === "insta") partirSurInstagram(""); else if (LISTE) versAtelier(); else versMerci("");
+  });
+  function partirSurInstagram(mot) {
+    try { sessionStorage.setItem(CLE_RETOUR, mot || "-"); } catch (e) {}
+    versMerci(mot);
+    window.location.href = INSTAGRAM;
+  }
+  $("form-mot").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!KIOSQUE && !SANS_SUITE) return;
+    var mot = motSaisi();
+    if (!mot) { $("mot").focus(); return; }
+    if (!unSeulMot(mot)) return;
+    dernierMot = mot; envoyerMot(mot); $("mot").blur(); versMerci(mot);
+  });
+
+  /* ---------- Étape 2 : les coordonnées ---------- */
+  // Message général, en bas du formulaire (envoi impossible).
+  function erreurAtelier(message) {
+    $("erreur-atelier").textContent = message; $("erreur-atelier").hidden = false;
+  }
+  // Messages par champ : tout ce qui bloque est signalé en une fois, chaque message sous son champ.
+  var CHAMPS = ["prenom", "nom", "telephone", "email", "contact"];
+  function effacerErreur(champ) {
+    $("err-" + champ).hidden = true;
+    if ($(champ)) $(champ).removeAttribute("aria-invalid");
+  }
+  function effacerErreurs() { CHAMPS.forEach(effacerErreur); $("erreur-atelier").hidden = true; }
+  function erreurChamp(champ, message) {
+    $("err-" + champ).textContent = message; $("err-" + champ).hidden = false;
+    if ($(champ)) $(champ).setAttribute("aria-invalid", "true");
+  }
+  ["prenom", "nom", "telephone", "email"].forEach(function (champ) {
+    $(champ).addEventListener("input", function () {
+      effacerErreur(champ);
+      if (champ === "telephone" || champ === "email") effacerErreur("contact");
+    });
+  });
+
+  /* Téléphone : l'indicatif se choisit tout seul d'après le début du numéro (0696 → Martinique, 0690 → Guadeloupe…). */
+  var PAYS_FR = { "596": 1, "590": 1, "594": 1, "262": 1, "33": 1 };   // numéros à 10 chiffres commençant par 0
+  var paysChoisi = false;                                              // vrai dès que le visiteur choisit lui-même
+  function choisirPays(code) {
+    var liste = $("pays");
+    for (var i = 0; i < liste.options.length; i++) if (liste.options[i].value === code) { liste.selectedIndex = i; return true; }
+    return false;
+  }
+  // Numéro saisi ou collé au format international (+596 696…, 00596 696…) : l'indicatif passe dans la liste.
+  function lireIndicatifSaisi() {
+    var brut = $("telephone").value.replace(/[^\d+]/g, "");
+    if (!/^(\+|00)\d/.test(brut)) return;
+    var chiffres = brut.replace(/^(\+|00)/, ""), trouve = "";
+    for (var i = 0; i < $("pays").options.length; i++) {
+      var c = $("pays").options[i].value;
+      if (c && chiffres.indexOf(c) === 0 && c.length > trouve.length) trouve = c;
+    }
+    if (!trouve) { choisirPays(""); paysChoisi = true; montrerExemple(); return; }
+    choisirPays(trouve); paysChoisi = true;
+    var reste = chiffres.slice(trouve.length);
+    $("telephone").value = (PAYS_FR[trouve] && reste.charAt(0) !== "0" ? "0" : "") + reste;
+    montrerExemple();
+  }
+  // France et outre-mer : le début du numéro désigne le territoire sans ambiguïté (0696 ne peut pas être +590),
+  // il commande donc toujours l'indicatif. Un pays étranger choisi à la main est respecté.
+  function devinerPays() {
+    var v = $("telephone").value.replace(/\D/g, "");
+    if (v.charAt(0) === "0" && v.length >= 4 && PAYS_FR[$("pays").value]) {
+      choisirPays(/^0(69[67]|596)/.test(v) ? "596" : /^0(69[01]|590)/.test(v) ? "590" : /^0(694|594)/.test(v) ? "594"
+        : /^0(69[23]|262|639|269)/.test(v) ? "262" : "33");
+    }
+    montrerExemple();
+  }
+  function exemplePays() { var o = $("pays").options[$("pays").selectedIndex]; return (o && o.getAttribute("data-exemple")) || ""; }
+  function montrerExemple() { $("telephone").placeholder = exemplePays(); }
+  $("pays").addEventListener("change", function () { paysChoisi = true; devinerPays(); effacerErreur("telephone"); });
+  $("telephone").addEventListener("input", devinerPays);
+  $("telephone").addEventListener("change", lireIndicatifSaisi);
+  // Renvoie { vide }, { erreur } ou { valeur } (numéro complet, par exemple +596696123456).
+  function telephoneComplet() {
+    lireIndicatifSaisi(); devinerPays();
+    var code = $("pays").value, brut = nettoyer($("telephone").value, 25), d = brut.replace(/\D/g, "");
+    if (!d) return { vide: true };
+    if (!code) {
+      d = d.replace(/^00/, "");
+      if (!/^(\+|00)/.test(brut.replace(/\s/g, "")) || d.length < 8 || d.length > 15)
+        return { erreur: "Avec « Autre », commencez le numéro par + puis l’indicatif du pays, par exemple " + exemplePays() + "." };
+      return { valeur: "+" + d };
+    }
+    if (PAYS_FR[code]) {
+      if (d.length === 10 && d.charAt(0) === "0") d = d.slice(1);
+      if (d.length !== 9 || d.charAt(0) === "0") return { erreur: "Ce numéro semble incomplet : 10 chiffres attendus, par exemple " + exemplePays() + "." };
+    } else {
+      if (code !== "39") d = d.replace(/^0/, "");
+      if (d.length < 6 || d.length > 12) return { erreur: "Ce numéro semble incomplet. Exemple : " + exemplePays() + "." };
+    }
+    return { valeur: "+" + code + d };
+  }
+
+  /* E-mail : format, caractères, et fautes de frappe courantes sur le nom de domaine. */
+  var DOMAINES = {
+    "gmial.com": "gmail.com", "gmai.com": "gmail.com", "gmal.com": "gmail.com", "gamil.com": "gmail.com", "gnail.com": "gmail.com",
+    "gmaill.com": "gmail.com", "gmail.co": "gmail.com", "gmail.con": "gmail.com", "gmail.cm": "gmail.com", "gmail.fr": "gmail.com",
+    "hotmial.com": "hotmail.com", "hotmai.com": "hotmail.com", "hotmal.com": "hotmail.com", "hotmail.con": "hotmail.com", "hotmail.co": "hotmail.com",
+    "hotmial.fr": "hotmail.fr", "hotmai.fr": "hotmail.fr", "yaho.com": "yahoo.com", "yahooo.com": "yahoo.com", "yahoo.con": "yahoo.com",
+    "yaho.fr": "yahoo.fr", "yahooo.fr": "yahoo.fr", "outlok.com": "outlook.com", "outloo.com": "outlook.com", "outlook.con": "outlook.com",
+    "outlok.fr": "outlook.fr", "orage.fr": "orange.fr", "ornage.fr": "orange.fr", "orange.com": "orange.fr", "wanado.fr": "wanadoo.fr",
+    "wanadoo.com": "wanadoo.fr", "iclou.com": "icloud.com", "icoud.com": "icloud.com", "icloud.con": "icloud.com",
+    "laposte.com": "laposte.net", "laposte.fr": "laposte.net", "lapost.net": "laposte.net"
+  };
+  var emailAccepte = "";   // adresse que le visiteur a maintenue malgré une suggestion
+  // Renvoie "" si l'adresse convient, sinon le message à afficher ; { suggestion } si une correction est proposée.
+  function controlerEmail(email) {
+    if (email.indexOf("@") < 0) return "Il manque le @ dans l’e-mail.";
+    if (email.split("@").length > 2) return "L’e-mail ne doit contenir qu’un seul @.";
+    var avant = email.split("@")[0], domaine = email.split("@")[1];
+    if (!avant) return "Il manque la partie avant le @ dans l’e-mail.";
+    if (/[^a-z0-9._%+-]/.test(avant) || /[^a-z0-9.-]/.test(domaine)) return "L’e-mail contient un caractère non valide (accent, virgule, espace…).";
+    if (/\.\./.test(email) || /^\.|\.$/.test(avant) || /^[.-]|[.-]$/.test(domaine)) return "L’e-mail contient un point mal placé. Vérifiez-le.";
+    if (!/\.[a-z]{2,}$/.test(domaine)) return "Il manque la fin de l’e-mail, par exemple .com ou .fr.";
+    if (DOMAINES[domaine] && email !== emailAccepte) return { suggestion: avant + "@" + DOMAINES[domaine] };
+    return "";
+  }
+  function proposerEmail(email, suggestion) {
+    var zone = $("err-email"); zone.textContent = "Vouliez-vous écrire " + suggestion + " ? ";
+    var oui = document.createElement("button"); oui.type = "button"; oui.className = "lien"; oui.textContent = "Oui, corriger";
+    oui.addEventListener("click", function () { $("email").value = suggestion; effacerErreur("email"); });
+    zone.appendChild(oui);
+    zone.appendChild(document.createTextNode(" Sinon, validez de nouveau."));
+    zone.hidden = false; emailAccepte = email;
+  }
+  $("form-atelier").addEventListener("submit", function (e) {
+    e.preventDefault();
+    effacerErreurs();
+    var prenom = nettoyer($("prenom").value, 60), nom = nettoyer($("nom").value, 60);
+    var tel = telephoneComplet(), email = nettoyer($("email").value, 120).replace(/\s/g, "").toLowerCase();
+    $("email").value = email;
+    var premier = "";   // premier champ à corriger : il reçoit le curseur
+    function signaler(champ, message, cible) { erreurChamp(champ, message); if (!premier) premier = cible || champ; }
+    if (!prenom) signaler("prenom", "Indiquez votre prénom.");
+    if (!nom) signaler("nom", "Indiquez votre nom.");
+    if (tel.vide && !email) signaler("contact", "Indiquez un téléphone ou un e-mail pour que nous puissions vous joindre.", "telephone");
+    if (tel.erreur) signaler("telephone", tel.erreur);
+    if (email) {
+      var avis = controlerEmail(email);
+      if (avis && avis.suggestion) { proposerEmail(email, avis.suggestion); if (!premier) premier = "email"; }
+      else if (avis) signaler("email", avis);
+    }
+    if (premier) { $(premier).focus(); return; }
+    var telephone = tel.valeur || "";
+
+    var bouton = $("btn-envoyer"), libelle = bouton.querySelector(".action"), intitule = libelle.textContent;
+    bouton.setAttribute("data-libelle", intitule);
+    bouton.disabled = true; libelle.textContent = "Envoi en cours…";
+    poster({
+      type: "inscription", id: identifiant(), prenom: prenom, nom: nom, telephone: telephone, email: email,
+      coche: CASE ? ($("case-oui").checked ? "Oui" : "Non") : "", mot: dernierMot, source: SOURCE
+    }).then(function (r) {
+      if (!r || !r.ok) throw new Error((r && r.erreur) || "refus");
+      $("titre-fin").textContent = "C’est noté, " + prenom + " !";
+      $("form-atelier").reset(); paysChoisi = false; emailAccepte = ""; montrerExemple();
+      montrer("vue-fin", "titre-fin");
+      if (KIOSQUE) retourAuto(10, "vue-fin");
+    }).catch(function () {
+      if (!clos) erreurAtelier("L’envoi n’a pas abouti. Vérifiez la connexion, puis appuyez de nouveau sur « " + $("btn-envoyer").getAttribute("data-libelle") + " ».");
+    }).finally(function () {
+      bouton.disabled = false; libelle.textContent = intitule;
+    });
+  });
+
+  /* ---------- Fins de parcours ---------- */
+  document.querySelectorAll("[data-recommencer]").forEach(function (b) { b.addEventListener("click", recommencer); });
+  document.querySelectorAll("[data-vers-atelier]").forEach(function (b) { b.addEventListener("click", versAtelier); });
+
+  // Retour depuis Instagram (page rechargée ou restaurée par le navigateur)
+  function auRetour() {
+    if (clos) return;
+    viderFile();
+    var retour = null;
+    try { retour = sessionStorage.getItem(CLE_RETOUR); } catch (e) {}
+    if (retour && $("vue-mot").hidden === false) { dernierMot = retour === "-" ? "" : retour; versMerci(dernierMot); }
+  }
+  window.addEventListener("pageshow", auRetour);
+  if (KIOSQUE) $("mot").focus();
+
+  /* ---------- Stand ouvert ou fermé ---------- */
+  // Fermé dans config.js : la clôture s'affiche tout de suite. Sinon, on demande au Google Sheet (menu « Stand »).
+  if (/^ferm/i.test(String(C.ETAT || ""))) fermer();
+  else if (!DEMO) {
+    fetch(API + (API.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(), { cache: "no-store", credentials: "omit", redirect: "follow" })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j && j.ouvert === false) fermer(); })
+      .catch(function () {});
+  }
+})();
 </script>
 </body>
 </html>

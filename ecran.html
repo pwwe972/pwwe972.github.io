@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuage de mots</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/icone.png">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  body { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; cursor: default; }
+
+  /* Bandeau : logo, question centrée, compteur */
+  .entete {
+    display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr); align-items: center; gap: 2vw;
+    padding: 1.8vh 2.4vw; background: var(--brume);
+  }
+  .entete img.logo { justify-self: start; height: clamp(3.5rem, 13vh, 11rem); width: auto; }
+  .question {
+    margin: 0; max-width: 30em; text-align: center;
+    font-family: var(--titre); font-weight: 900; color: #0b5c8c;
+    font-size: clamp(1.4rem, 3.3vw, 5rem); line-height: 1.04; text-wrap: balance;
+  }
+  .compteur { justify-self: end; margin: 0; text-align: center; font-size: clamp(.8rem, 1.15vw, 1.8rem); line-height: 1.1; }
+  .compteur b { display: block; font-family: var(--titre); font-weight: 900; color: var(--canne); font-size: 3.6em; line-height: .95; }
+
+  .nuage { position: relative; margin: 2vh 2.4vw 1vh; min-height: 0; }
+  .mot {
+    position: absolute; left: 0; top: 0; white-space: nowrap;
+    font-family: var(--titre); font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: .01em;
+    transform-origin: 0 0; will-change: transform;
+    transition: transform .9s cubic-bezier(.2, .8, .2, 1), opacity .5s ease, color .6s ease;
+  }
+  .mot.arrive { opacity: 0; }
+  .mot.dernier { color: var(--ciel-profond) !important; }
+  .mot.dernier::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -.06em; height: .09em;
+    background: var(--ciel); border-radius: 1em;
+    animation: trait 1s cubic-bezier(.2, .8, .2, 1) both; transform-origin: left;
+  }
+  @keyframes trait { from { transform: scaleX(0); } }
+  .vide {
+    position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
+    font-family: var(--titre); font-weight: 400; color: var(--bois); font-size: clamp(1.4rem, 3vw, 4.4rem); line-height: 1.1;
+  }
+  .pied { margin: 0; padding: 0 2.4vw 2.2vh; display: flex; align-items: baseline; justify-content: space-between; gap: 2vw; font-size: clamp(.9rem, 1.45vw, 2.2rem); min-height: 1.5em; }
+  .pied strong { font-family: var(--titre); font-weight: 900; text-transform: uppercase; color: var(--ciel-profond); font-size: 1.25em; letter-spacing: .01em; }
+  .pied .fois { margin-left: .7em; padding: .12em .6em; border-radius: 1em; background: var(--brume); color: var(--canne); font-weight: 600; white-space: nowrap; }
+  .etat { color: var(--alerte); font-weight: 600; }
+  .clos { color: var(--bois); font-weight: 600; }
+
+  .bulle {
+    position: fixed; left: 0; top: 0; z-index: 5; margin: 0; padding: .35em .8em; border-radius: 6px; pointer-events: none; white-space: nowrap;
+    background: var(--melasse); color: #fff; font-weight: 600; font-size: clamp(1rem, 1.5vw, 2rem);
+  }
+  .astuce {
+    position: fixed; left: 50%; bottom: 3vh; transform: translateX(-50%);
+    padding: .5em 1em; border-radius: 6px; background: var(--melasse); color: #fff; font-size: 1rem;
+    transition: opacity .6s ease; pointer-events: none;
+  }
+  .astuce.cachee { opacity: 0; }
+
+  @media (max-aspect-ratio: 1/1) {
+    .entete img.logo { height: 9vh; } .question { font-size: 5vw; }
+  }
+  @media (prefers-reduced-motion: reduce) { .mot { transition: none; } .mot.dernier::after { animation: none; } }
+</style>
+</head>
+<body>
+  <header class="entete">
+    <img class="logo" id="logo" src="assets/logo-pwwe.png" alt="" width="485" height="520">
+    <h1 class="question" id="question"></h1>
+    <p class="compteur"><b id="total">0</b><span id="total-libelle">mot déposé</span></p>
+  </header>
+
+  <main class="nuage" id="nuage" aria-live="off">
+    <p class="vide" id="vide" hidden>Le nuage attend son premier mot.</p>
+  </main>
+
+  <p class="pied">
+    <span id="dernier"></span>
+    <span class="etat" id="etat" hidden>Connexion interrompue, nouvelle tentative…</span>
+    <span class="clos" id="clos" hidden>Stand fermé : le nuage n’évolue plus.</span>
+  </p>
+
+  <p class="bulle" id="bulle" hidden></p>
+  <p class="astuce" id="astuce">Touche F ou clic : plein écran</p>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  "use strict";
+  var C = window.STAND || {};
+  var API = String(C.API || "").trim();
+  var DEMO = !/^https:\/\/script\.google(usercontent)?\.com\//.test(API);
+  var PERIODE = 3000;       // intervalle de rafraîchissement, en millisecondes
+  var MAX_MOTS = 110;       // nombre maximal de mots distincts affichés
+  var POLICE = '900 100px "Londrina Solid", "Arial Narrow", Arial, sans-serif';
+  // Teintes des mots : celles de config.js (COULEURS) si elles sont données, sinon la palette de la charte.
+  var COULEURS = (Array.isArray(C.COULEURS) && C.COULEURS.length) ? C.COULEURS : ["#64360d", "#0f7fbd", "#9a6a3a", "#b46a0c", "#557a1c", "#2a1605", "#0b5c8c"];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var nuage = $("nuage");
+  var mesure = document.createElement("canvas").getContext("2d");
+  var elements = {};        // clé du mot -> élément affiché
+  var signature = null;     // pour ne recalculer que si les données changent
+  var cleDernier = "", donnees = [], echecs = 0;
+
+  $("question").textContent = C.QUESTION || "Votre mot ?";
+  document.title = "Nuage de mots" + (C.ORGANISATION ? " " + C.ORGANISATION : "");
+  $("logo").alt = C.NOM_COMPLET || C.ORGANISATION || "";
+  if (C.LOGO && C.LOGO !== $("logo").getAttribute("src")) {
+    $("logo").removeAttribute("width"); $("logo").removeAttribute("height"); $("logo").src = C.LOGO;
+  }
+
+  /* ---------- Regroupement des mots ---------- */
+  function cle(mot) {
+    return mot.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function hache(texte) { var h = 2166136261; for (var i = 0; i < texte.length; i++) { h ^= texte.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function regrouper(mots) {
+    var groupes = {}, ordre = [];
+    mots.forEach(function (brut, rang) {
+      var texte = String(brut).replace(/\s+/g, " ").trim(); var k = cle(texte);
+      if (!k) return;
+      var g = groupes[k];
+      if (!g) { g = groupes[k] = { cle: k, n: 0, formes: {}, premier: rang, dernier: rang }; ordre.push(g); }
+      g.n++; g.dernier = rang;
+      var forme = texte.toLocaleLowerCase("fr");
+      g.formes[forme] = (g.formes[forme] || 0) + 1;
+    });
+    ordre.forEach(function (g) {
+      // forme la plus fréquente ; à égalité, celle qui porte des accents
+      g.texte = Object.keys(g.formes).sort(function (a, b) {
+        return g.formes[b] - g.formes[a] || (b !== cle(b)) - (a !== cle(a));
+      })[0];
+    });
+    return ordre;
+  }
+
+  /* ---------- Placement : spirale depuis le centre, sans chevauchement ---------- */
+  function placer(groupes, L, H, echelle) {
+    var poses = [], cx = L / 2, cy = H / 2, aspect = L / H;
+    for (var i = 0; i < groupes.length; i++) {
+      var g = groupes[i];
+      var taille = g.poids * echelle;
+      var l = g.largeur * taille / 100 + taille * 0.34, h = taille * 1.06;
+      if (l > L || h > H) return null;
+      var depart = (hache(g.cle) % 628) / 100, pas = Math.max(4, taille * 0.14), ok = false;
+      for (var t = 0; t < 4000; t++) {
+        var angle = depart + t * 0.31, r = pas * t * 0.085;
+        var x = cx + r * Math.cos(angle) * aspect - l / 2, y = cy + r * Math.sin(angle) - h / 2;
+        if (x < 0 || y < 0 || x + l > L || y + h > H) { if (r > Math.max(L, H)) break; continue; }
+        var libre = true;
+        for (var j = 0; j < poses.length; j++) {
+          var p = poses[j];
+          if (x < p.x + p.l && x + l > p.x && y < p.y + p.h && y + h > p.y) { libre = false; break; }
+        }
+        if (libre) { poses.push({ g: g, x: x, y: y, l: l, h: h, taille: taille }); ok = true; break; }
+      }
+      if (!ok) return null;
+    }
+    return poses;
+  }
+
+  function dessiner() {
+    var L = nuage.clientWidth, H = nuage.clientHeight;
+    var groupes = regrouper(donnees);
+    $("vide").hidden = groupes.length > 0;
+
+    // Les plus cités d'abord, puis les plus récents ; le dernier mot arrivé reste toujours visible.
+    groupes.sort(function (a, b) { return b.n - a.n || b.dernier - a.dernier; });
+    if (groupes.length > MAX_MOTS) {
+      var garde = groupes.slice(0, MAX_MOTS);
+      if (cleDernier && !garde.some(function (g) { return g.cle === cleDernier; })) {
+        var d = groupes.filter(function (g) { return g.cle === cleDernier; })[0];
+        if (d) garde[MAX_MOTS - 1] = d;
+      }
+      groupes = garde;
+    }
+    groupes.sort(function (a, b) { return b.n - a.n || a.premier - b.premier; });
+
+    mesure.font = POLICE;
+    groupes.forEach(function (g) {
+      g.affiche = g.texte.toLocaleUpperCase("fr");
+      g.largeur = mesure.measureText(g.affiche).width;
+      g.poids = Math.sqrt(g.n);
+    });
+
+    // Plus grande échelle qui laisse tout tenir dans la zone
+    var poses = null;
+    if (groupes.length && L > 50 && H > 50) {
+      var bas = 4, haut = H * 0.34 / groupes[0].poids, meilleur = null;
+      for (var k = 0; k < 9; k++) {
+        var milieu = (bas + haut) / 2, essai = placer(groupes, L, H, milieu);
+        if (essai) { meilleur = essai; bas = milieu; } else { haut = milieu; }
+      }
+      poses = meilleur || placer(groupes, L, H, bas) || [];
+    }
+
+    var vus = {};
+    (poses || []).forEach(function (p) {
+      var g = p.g, el = elements[g.cle], nouveau = !el;
+      if (nouveau) {
+        el = elements[g.cle] = document.createElement("span");
+        el.className = "mot arrive";
+        el.style.fontSize = "100px";
+        el.style.color = COULEURS[hache(g.cle) % COULEURS.length];
+        nuage.appendChild(el);
+      }
+      vus[g.cle] = true;
+      if (el.textContent !== g.affiche) el.textContent = g.affiche;
+      el.dataset.n = g.n;
+      var e = p.taille / 100, x = p.x + p.taille * 0.17, y = p.y + p.taille * 0.05;
+      var cible = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + e.toFixed(4) + ")";
+      if (nouveau) {
+        el.style.transform = "translate(" + (x + p.l * 0.1).toFixed(1) + "px," + (y + p.h * 0.1).toFixed(1) + "px) scale(" + (e * 0.8).toFixed(4) + ")";
+        void el.offsetWidth;
+        el.classList.remove("arrive");
+      }
+      el.style.transform = cible;
+      el.classList.toggle("dernier", g.cle === cleDernier);
+    });
+    Object.keys(elements).forEach(function (k) {
+      if (!vus[k]) { var el = elements[k]; delete elements[k]; el.classList.add("arrive"); setTimeout(function () { el.remove(); }, 600); }
+    });
+  }
+
+  /* ---------- Au survol d'un mot : combien de fois il a été cité ---------- */
+  var bulle = $("bulle");
+  nuage.addEventListener("mousemove", function (e) {
+    var el = e.target.closest ? e.target.closest(".mot") : null;
+    if (!el) { bulle.hidden = true; return; }
+    var n = Number(el.dataset.n) || 1;
+    bulle.textContent = el.textContent + " : cité " + n + " fois";
+    bulle.hidden = false;
+    var x = Math.min(e.clientX + 16, window.innerWidth - bulle.offsetWidth - 8), y = Math.max(e.clientY - bulle.offsetHeight - 12, 8);
+    bulle.style.transform = "translate(" + x + "px," + y + "px)";
+  });
+  nuage.addEventListener("mouseleave", function () { bulle.hidden = true; });
+
+  /* ---------- Mise à jour ---------- */
+  function recevoir(mots) {
+    var s = mots.join("\n");
+    if (s === signature) return;
+    signature = s; donnees = mots;
+
+    var cles = mots.map(function (m) { return cle(String(m)); }).filter(Boolean);
+    var derniereCle = cles.length ? cles[cles.length - 1] : "";
+    var dernierTexte = mots.length ? String(mots[mots.length - 1]).trim() : "";
+    cleDernier = derniereCle;
+
+    $("total").textContent = cles.length;
+    $("total-libelle").textContent = cles.length > 1 ? "mots déposés" : "mot déposé";
+    var pied = $("dernier"); pied.textContent = "";
+    if (dernierTexte) {
+      pied.appendChild(document.createTextNode("Dernier mot arrivé : "));
+      var fort = document.createElement("strong"); fort.textContent = dernierTexte; pied.appendChild(fort);
+      var fois = cles.filter(function (k) { return k === derniereCle; }).length;
+      var compte = document.createElement("span"); compte.className = "fois";
+      compte.textContent = fois > 1 ? "cité " + fois + " fois" : "nouveau mot !";
+      pied.appendChild(compte);
+    }
+    dessiner();
+  }
+
+  var EXEMPLES = (Array.isArray(C.EXEMPLES) && C.EXEMPLES.length) ? C.EXEMPLES
+    : ["partage", "souvenir", "famille", "fête", "partage", "soleil", "amis", "enfance", "partage", "fête", "voyage", "soleil"];
+  function lireDemo() {
+    var locaux = []; try { locaux = JSON.parse(localStorage.getItem("stand-demo-mots")) || []; } catch (e) {}
+    return Promise.resolve(EXEMPLES.concat(locaux));
+  }
+  function lireApi() {
+    var ctrl = new AbortController(), delai = setTimeout(function () { ctrl.abort(); }, 12000);
+    return fetch(API + (API.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(), { cache: "no-store", credentials: "omit", redirect: "follow", signal: ctrl.signal })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (!j || !j.ok || !Array.isArray(j.mots)) throw new Error("réponse inattendue"); $("clos").hidden = j.ouvert !== false; return j.mots; })
+      .finally(function () { clearTimeout(delai); });
+  }
+  function boucle() {
+    (DEMO ? lireDemo() : lireApi()).then(function (mots) {
+      echecs = 0; $("etat").hidden = true; recevoir(mots);
+    }).catch(function () {
+      if (++echecs >= 3) $("etat").hidden = false;
+    }).finally(function () { setTimeout(boucle, PERIODE); });
+  }
+
+  /* ---------- Confort d'affichage ---------- */
+  var redim = null;
+  window.addEventListener("resize", function () { clearTimeout(redim); redim = setTimeout(dessiner, 200); });
+
+  function pleinEcran() {
+    var d = document.documentElement;
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (d.requestFullscreen) d.requestFullscreen().catch(function () {});
+    veille();
+  }
+  document.addEventListener("click", pleinEcran);
+  document.addEventListener("keydown", function (e) { if (e.key === "f" || e.key === "F") pleinEcran(); });
+  setTimeout(function () { $("astuce").classList.add("cachee"); }, 8000);
+
+  // Empêche la mise en veille de l'écran quand le navigateur le permet
+  var verrou = null;
+  function veille() {
+    if (!("wakeLock" in navigator) || verrou) return;
+    navigator.wakeLock.request("screen").then(function (v) {
+      verrou = v; v.addEventListener("release", function () { verrou = null; });
+    }).catch(function () {});
+  }
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") veille(); });
+  veille();
+
+  if (DEMO) {
+    $("astuce").textContent = "Mode démo : mots d’exemple (config.js sans adresse API)";
+  }
+  (document.fonts && document.fonts.load ? document.fonts.load(POLICE, "É") : Promise.resolve())
+    .catch(function () {}).then(boucle);
+})();
+</script>
+</body>
+</html>

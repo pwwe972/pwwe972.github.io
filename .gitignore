@@ -1,0 +1,11 @@
+# Réglages et fichiers propres à un poste
+.DS_Store
+.claude/
+apps-script/.clasp.json
+
+# Documents de travail et impressions (affiches en PDF, captures, parcours)
+*.pdf
+apercus/
+
+# Liste complémentaire de mots bloqués : elle vit dans le projet Apps Script, pas sur le site public
+apps-script/MotsBloques.gs
